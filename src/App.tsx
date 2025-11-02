@@ -9,6 +9,8 @@ import Pinned from "./pages/Pinned";
 import FeedDetail from "./pages/FeedDetail";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
+import Gone from "./pages/Gone";
+import LegacyRedirect from "./components/LegacyRedirect";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +26,12 @@ const App = () => (
           <Route path="/pinned" element={<Pinned />} />
           <Route path="/feed/:feedId" element={<FeedDetail />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/gone" element={<Gone />} />
+          
+          {/* Legacy URL redirects */}
+          <Route path="/flux/*" element={<LegacyRedirect />} />
+          <Route path="/account/*" element={<LegacyRedirect />} />
+          
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
