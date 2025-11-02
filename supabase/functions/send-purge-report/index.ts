@@ -184,7 +184,7 @@ const handler = async (req: Request): Promise<Response> => {
     `;
 
     const emailResponse = await resend.emails.send({
-      from: "News Aggregator <onboarding@resend.dev>",
+      from: "News Aggregator <notifications@notifications.duhaz.fr>",
       to: adminEmails,
       subject: `📊 Rapport de purge automatique - ${deletedCount} article${deletedCount > 1 ? 's' : ''} supprimé${deletedCount > 1 ? 's' : ''}`,
       html: emailHtml,
