@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.send-purge-report]
 verify_jwt = false
+
+[functions.fetch-website-rss]
+verify_jwt = false

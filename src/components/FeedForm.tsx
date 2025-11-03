@@ -21,6 +21,7 @@ import {
   getChannelIdInstructions,
   isDirectRSSFeed
 } from '@/utils/youtube';
+import { fetchWebsiteRSS, isDirectRSSFeed as isDirectRSSUrl } from '@/utils/rss';
 import { feedTypeOptions } from './FeedTypeOptions';
 import { NewsCategory } from '@/types/news';
 import { AlertTriangle, Info } from 'lucide-react';
@@ -109,6 +110,39 @@ const FeedForm = ({ selectedType, onSubmit, onCancel, categories }: FeedFormProp
       
       setIsLoadingChannelName(false);
     }
+    
+    // If it's an RSS auto URL, try to automatically detect RSS feed
+    if (selectedType === 'rss-auto' && url && !isDirectRSSUrl(url)) {
+      setIsLoadingChannelName(true);
+      
+      try {
+        const result = await fetchWebsiteRSS(url);
+        
+        if (result) {
+          // Update the URL field with the detected RSS URL
+          form.setValue('url', result.rssUrl);
+          
+          // Set the site name if we don't have one yet
+          if (!form.getValues('name') && result.siteName) {
+            form.setValue('name', result.siteName);
+          }
+          
+          setUrlWarning(null);
+          
+          // If multiple feeds found, show info
+          if (result.feeds && result.feeds.length > 1) {
+            setUrlWarning(`✓ ${result.feeds.length} flux RSS détectés. Le premier a été sélectionné.`);
+          }
+        } else {
+          setUrlWarning('Aucun flux RSS détecté automatiquement sur ce site.');
+        }
+      } catch (error) {
+        console.error('Error fetching website RSS:', error);
+        setUrlWarning('Erreur lors de la détection automatique du flux RSS.');
+      }
+      
+      setIsLoadingChannelName(false);
+    }
   };
 
   const selectedTypeOption = feedTypeOptions.find(option => option.value === selectedType);
@@ -118,6 +152,7 @@ const FeedForm = ({ selectedType, onSubmit, onCancel, categories }: FeedFormProp
       case 'youtube':
         return 'https://www.youtube.com/channel/UCxxxxx ou https://www.youtube.com/feeds/videos.xml?channel_id=UCxxxxx';
       case 'rss-auto':
+        return 'https://example.com (le flux RSS sera détecté automatiquement)';
       case 'rss-manual':
         return 'https://example.com/feed.xml';
       default:
@@ -128,6 +163,9 @@ const FeedForm = ({ selectedType, onSubmit, onCancel, categories }: FeedFormProp
   const getUrlHelperText = () => {
     if (selectedType === 'youtube') {
       return 'Utilisez de préférence l\'URL avec l\'ID de chaîne (UC...) ou l\'URL RSS directe pour éviter les erreurs';
+    }
+    if (selectedType === 'rss-auto') {
+      return 'Entrez l\'URL du site web et le flux RSS sera automatiquement détecté';
     }
     return null;
   };
