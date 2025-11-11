@@ -10,6 +10,7 @@ import FeedDetail from "./pages/FeedDetail";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Gone from "./pages/Gone";
+import Changelog from "./pages/Changelog";
 import LegacyRedirect from "./components/LegacyRedirect";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/pinned" element={<Pinned />} />
           <Route path="/feed/:feedId" element={<FeedDetail />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/changelog" element={<Changelog />} />
           <Route path="/gone" element={<Gone />} />
           
           {/* Legacy URL redirects */}
