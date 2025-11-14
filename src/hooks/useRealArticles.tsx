@@ -62,13 +62,14 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
           .from('articles')
           .select(`
             *,
-            feeds!inner(name, category),
+            feeds!inner(name, category, status),
             user_articles!inner(is_read, is_pinned)
           `)
           .in('feed_id', followedFeedIds)
           .eq('user_articles.user_id', user.id)
           .eq('user_articles.is_pinned', true)
-          .eq('user_articles.is_read', false);
+          .eq('user_articles.is_read', false)
+          .eq('feeds.status', 'active');
 
         const { data: pinnedArticles, error: pinnedError } = await pinnedQuery
           .order('published_at', { ascending: false })
@@ -87,21 +88,23 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
             .from('articles')
             .select(`
               *,
-              feeds!inner(name, category),
+              feeds!inner(name, category, status),
               user_articles!left(is_read, is_pinned)
             `)
             .in('feed_id', followedFeedIds)
-            .or(`user_articles.is.null,user_articles.is_read.eq.false`);
+            .or(`user_articles.is.null,user_articles.is_read.eq.false`)
+            .eq('feeds.status', 'active');
         } else {
           // Include all articles (read and unread)
           regularQuery = supabase
             .from('articles')
             .select(`
               *,
-              feeds!inner(name, category),
+              feeds!inner(name, category, status),
               user_articles(is_read, is_pinned)
             `)
-            .in('feed_id', followedFeedIds);
+            .in('feed_id', followedFeedIds)
+            .eq('feeds.status', 'active');
         }
         
         // Apply date filter to regular articles only
@@ -165,11 +168,12 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
             .from('articles')
             .select(`
               *,
-              feeds!inner(name, category),
+              feeds!inner(name, category, status),
               user_articles!inner(is_read, is_pinned)
             `)
             .eq('user_articles.user_id', user.id)
-            .eq('user_articles.is_pinned', true);
+            .eq('user_articles.is_pinned', true)
+            .eq('feeds.status', 'active');
 
           const { data: pinnedData, error: pinnedError } = await pinnedQuery
             .order('published_at', { ascending: false })
@@ -187,9 +191,10 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
           .from('articles')
           .select(`
             *,
-            feeds!inner(name, category),
+            feeds!inner(name, category, status),
             user_articles(is_read, is_pinned)
-          `);
+          `)
+          .eq('feeds.status', 'active');
         
         // Don't apply date filter in "All articles" mode - show everything
         

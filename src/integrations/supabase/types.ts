@@ -211,19 +211,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      is_super_user: {
-        Args: { user_email?: string }
-        Returns: boolean
-      }
+      is_super_user: { Args: { user_email?: string }; Returns: boolean }
       purge_old_articles: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           admin_emails: string[]
           deleted_count: number
         }[]
       }
       test_purge_articles: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           articles_to_delete: number
           newest_article_date: string

@@ -22,7 +22,7 @@ const Index = () => {
   } = useAuth();
   const navigate = useNavigate();
   const [dateFilter, setDateFilter] = useState<'today' | 'yesterday' | null>(null);
-  const [showFollowedOnly, setShowFollowedOnly] = useState(false);
+  const [showFollowedOnly, setShowFollowedOnly] = useState(!!user);
   const [showReadArticles, setShowReadArticles] = useState(false);
 
   // Reset date filter when switching to "All articles" mode
