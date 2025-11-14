@@ -9,6 +9,20 @@ export interface ChangelogEntry {
 
 export const changelogData: ChangelogEntry[] = [
   {
+    version: "1.4.0",
+    date: "2025-01-14",
+    category: "improvement",
+    title: "Interface mobile optimisée et filtrage amélioré",
+    description: "Refonte complète du header pour mobile avec menu hamburger et amélioration du système de filtrage des flux.",
+    details: [
+      "Header responsive avec menu hamburger sur mobile",
+      "Navigation optimisée pour tablettes et smartphones",
+      "Filtrage automatique des flux désactivés",
+      "Affichage par défaut des flux suivis pour les utilisateurs connectés",
+      "Amélioration de l'expérience utilisateur sur tous les écrans"
+    ]
+  },
+  {
     version: "1.3.0",
     date: "2025-01-20",
     category: "feature",
