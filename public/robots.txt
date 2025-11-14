@@ -1,7 +1,7 @@
 # Robots.txt pour feeds.duhaz.fr
 # Mise à jour: 2025-01-14
 
-# Règles pour les principaux moteurs de recherche
+# Regles pour les principaux moteurs de recherche
 User-agent: Googlebot
 Allow: /
 Disallow: /auth
@@ -12,7 +12,7 @@ Allow: /
 Disallow: /auth
 Disallow: /gone
 
-# Bots des réseaux sociaux (pour les previews)
+# Bots des reseaux sociaux (pour les previews)
 User-agent: Twitterbot
 Allow: /
 
@@ -22,14 +22,14 @@ Allow: /
 User-agent: LinkedInBot
 Allow: /
 
-# Règles par défaut pour tous les autres bots
+# Regles par defaut pour tous les autres bots
 User-agent: *
 Allow: /
 Disallow: /auth
 Disallow: /gone
 # Note: /flux/ et /account/ redirigent vers /gone (HTTP 410) donc pas besoin de les bloquer
 
-# Crawl delay pour éviter la surcharge serveur
+# Crawl delay pour eviter la surcharge serveur
 Crawl-delay: 1
 
 # Sitemap principal
