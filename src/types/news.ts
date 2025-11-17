@@ -13,6 +13,7 @@ export interface NewsItem {
   url?: string;
   imageUrl?: string;
   feedId?: string;
+  isDiscovery?: boolean;
 }
 
 export interface NewsCategory {

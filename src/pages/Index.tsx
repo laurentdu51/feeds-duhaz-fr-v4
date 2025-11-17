@@ -23,14 +23,26 @@ const Index = () => {
   const navigate = useNavigate();
   const [dateFilter, setDateFilter] = useState<'today' | 'yesterday' | null>(null);
   const [showFollowedOnly, setShowFollowedOnly] = useState(!!user);
+  const [showDiscoveryMode, setShowDiscoveryMode] = useState(false);
   const [showReadArticles, setShowReadArticles] = useState(false);
 
-  // Reset date filter when switching to "All articles" mode
-  const handleShowFollowedOnlyChange = (value: boolean) => {
-    setShowFollowedOnly(value);
-    if (!value) {
-      // When switching to "All articles", reset date filter
-      setDateFilter(null);
+  // Handle view mode changes (followed, discovery, all)
+  const handleViewModeChange = (mode: 'followed' | 'discovery' | 'all') => {
+    switch (mode) {
+      case 'followed':
+        setShowFollowedOnly(true);
+        setShowDiscoveryMode(false);
+        break;
+      case 'discovery':
+        setShowFollowedOnly(false);
+        setShowDiscoveryMode(true);
+        setDateFilter(null);
+        break;
+      case 'all':
+        setShowFollowedOnly(false);
+        setShowDiscoveryMode(false);
+        setDateFilter(null);
+        break;
     }
   };
   const {
@@ -40,7 +52,7 @@ const Index = () => {
     markAsRead,
     deleteArticle,
     refetch
-  } = useRealArticles(dateFilter, showFollowedOnly, showReadArticles);
+  } = useRealArticles(dateFilter, showFollowedOnly, showReadArticles, showDiscoveryMode);
   const isMobile = useIsMobile();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -158,7 +170,8 @@ const Index = () => {
                 dateFilter={dateFilter}
                 onDateFilterChange={setDateFilter}
                 showFollowedOnly={showFollowedOnly}
-                onShowFollowedOnlyChange={handleShowFollowedOnlyChange}
+                showDiscoveryMode={showDiscoveryMode}
+                onViewModeChange={handleViewModeChange}
                 showReadArticles={showReadArticles}
                 onShowReadArticlesChange={setShowReadArticles}
                 onTogglePin={togglePin}
@@ -220,7 +233,8 @@ const Index = () => {
                           dateFilter={dateFilter}
                           onDateFilterChange={setDateFilter}
                           showFollowedOnly={showFollowedOnly}
-                          onShowFollowedOnlyChange={handleShowFollowedOnlyChange}
+                          showDiscoveryMode={showDiscoveryMode}
+                          onViewModeChange={handleViewModeChange}
                           showReadArticles={showReadArticles}
                           onShowReadArticlesChange={setShowReadArticles}
                           onTogglePin={togglePin}
@@ -299,7 +313,7 @@ const Index = () => {
                     </Button>
                   </div>}
               </div> : <div className="space-y-4">
-                {regularArticles.map(item => <NewsCard key={item.id} news={item} onTogglePin={togglePin} onMarkAsRead={markAsRead} onDelete={deleteArticle} onOpenArticle={handleOpenArticle} onSourceClick={handleSourceClick} />)}
+                {regularArticles.map(item => <NewsCard key={item.id} news={item} onTogglePin={togglePin} onMarkAsRead={markAsRead} onDelete={deleteArticle} onOpenArticle={handleOpenArticle} onSourceClick={handleSourceClick} isDiscoveryMode={showDiscoveryMode} />)}
               </div>}
           </div>
         </div>

@@ -13,6 +13,7 @@ interface NewsCardProps {
   onDelete: (id: string) => void;
   onOpenArticle: (article: NewsItem) => void;
   onSourceClick?: (feedId: string, feedName: string) => void;
+  isDiscoveryMode?: boolean;
 }
 const NewsCard = ({
   news,
@@ -20,7 +21,8 @@ const NewsCard = ({
   onMarkAsRead,
   onDelete,
   onOpenArticle,
-  onSourceClick
+  onSourceClick,
+  isDiscoveryMode
 }: NewsCardProps) => {
   const {
     user
@@ -73,11 +75,16 @@ const NewsCard = ({
     onOpenArticle(news);
     // Don't automatically mark as read on card click - user can use the "Mark as read" button
   };
-  return <Card className={cn("group hover:shadow-lg transition-all duration-300 border-l-4 cursor-pointer", news.isPinned && "border-l-yellow-500", news.isRead && "opacity-75", !news.isRead && "border-l-primary")}>
+  return <Card className={cn("group hover:shadow-lg transition-all duration-300 border-l-4 cursor-pointer", news.isPinned && "border-l-yellow-500", isDiscoveryMode && "border-l-purple-500", news.isRead && "opacity-75", !news.isRead && !isDiscoveryMode && "border-l-primary")}>
       <CardHeader className="space-y-3">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 space-y-2" onClick={handleCardClick}>
             <div className="flex items-center gap-2">
+              {isDiscoveryMode && (
+                <Badge variant="outline" className="bg-purple-500/10 text-purple-700 border-purple-200">
+                  🔍 Nouveau flux
+                </Badge>
+              )}
             </div>
             
             <h3 className={cn("flex items-center gap-2 font-semibold leading-tight group-hover:text-primary transition-colors", news.isRead && "text-muted-foreground")}>

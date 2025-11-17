@@ -49,7 +49,8 @@ interface CategoryFilterProps {
   dateFilter?: 'today' | 'yesterday' | null;
   onDateFilterChange?: (filter: 'today' | 'yesterday' | null) => void;
   showFollowedOnly?: boolean;
-  onShowFollowedOnlyChange?: (showFollowedOnly: boolean) => void;
+  showDiscoveryMode?: boolean;
+  onViewModeChange?: (mode: 'followed' | 'discovery' | 'all') => void;
   showReadArticles?: boolean;
   onShowReadArticlesChange?: (showReadArticles: boolean) => void;
   onTogglePin?: (articleId: string) => void;
@@ -76,7 +77,8 @@ const CategoryFilter = ({
   dateFilter,
   onDateFilterChange,
   showFollowedOnly,
-  onShowFollowedOnlyChange,
+  showDiscoveryMode,
+  onViewModeChange,
   showReadArticles,
   onShowReadArticlesChange,
   onTogglePin,
@@ -133,12 +135,12 @@ const CategoryFilter = ({
         })}
       </div>
       
-      {(onDateFilterChange || (user && onShowFollowedOnlyChange) || user) && (
+      {(onDateFilterChange || (user && onViewModeChange) || user) && (
         <div className="pt-4 border-t space-y-3">
           <div className="flex flex-wrap items-start gap-4">
             
             {/* Section 1: Filtres d'affichage */}
-            {user && onShowFollowedOnlyChange && (
+            {user && onViewModeChange && (
               <div className="flex flex-col gap-2 min-w-fit">
                 <div className="flex items-center gap-2 mb-1">
                   <Heart className="h-4 w-4 text-muted-foreground" />
@@ -146,21 +148,30 @@ const CategoryFilter = ({
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Button
-                    variant={!showFollowedOnly ? "default" : "outline"}
-                    size="sm"
-                    className="justify-start gap-2 whitespace-nowrap"
-                    onClick={() => onShowFollowedOnlyChange(false)}
-                  >
-                    Tous les flux
-                  </Button>
-                  <Button
                     variant={showFollowedOnly ? "default" : "outline"}
                     size="sm"
                     className="justify-start gap-2 whitespace-nowrap"
-                    onClick={() => onShowFollowedOnlyChange(true)}
+                    onClick={() => onViewModeChange('followed')}
                   >
                     <Heart className="h-3 w-3" />
-                    Flux suivis uniquement
+                    Mes flux
+                  </Button>
+                  <Button
+                    variant={showDiscoveryMode ? "default" : "outline"}
+                    size="sm"
+                    className="justify-start gap-2 whitespace-nowrap"
+                    onClick={() => onViewModeChange('discovery')}
+                  >
+                    <Rss className="h-3 w-3" />
+                    Découverte
+                  </Button>
+                  <Button
+                    variant={!showFollowedOnly && !showDiscoveryMode ? "default" : "outline"}
+                    size="sm"
+                    className="justify-start gap-2 whitespace-nowrap"
+                    onClick={() => onViewModeChange('all')}
+                  >
+                    Tous les flux
                   </Button>
                 </div>
               </div>
@@ -188,7 +199,7 @@ const CategoryFilter = ({
             )}
 
             {/* Section 2: Filtres de date - Only show for followed feeds */}
-            {onDateFilterChange && showFollowedOnly && (
+            {onDateFilterChange && showFollowedOnly && !showDiscoveryMode && (
               <div className="flex flex-col gap-2 min-w-fit">
                 <div className="flex items-center gap-2 mb-1">
                   <Calendar className="h-4 w-4 text-muted-foreground" />

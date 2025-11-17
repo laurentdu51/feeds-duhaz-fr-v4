@@ -5,7 +5,7 @@ import { useAuth } from './useAuth';
 import { NewsItem } from '@/types/news';
 import { toast } from 'sonner';
 
-export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showFollowedOnly?: boolean, showReadArticles?: boolean) {
+export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showFollowedOnly?: boolean, showReadArticles?: boolean, showDiscoveryMode?: boolean) {
   const [articles, setArticles] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
@@ -155,6 +155,72 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
           })) || [];
 
         setArticles(transformedArticles.slice(0, 100));
+      } else if (showDiscoveryMode && user) {
+        // ======= MODE DÉCOUVERTE =======
+        console.log('🔍 Discovery mode active');
+        
+        // 1. Récupérer tous les feed_id que l'utilisateur a déjà interagi avec
+        const { data: knownFeeds } = await supabase
+          .from('user_feeds')
+          .select('feed_id')
+          .eq('user_id', user.id);
+        
+        const knownFeedIds = knownFeeds?.map(f => f.feed_id) || [];
+        console.log('📚 Known feeds to exclude:', knownFeedIds);
+        
+        // 2. Récupérer uniquement les articles des flux inconnus + actifs
+        let discoveryQuery = supabase
+          .from('articles')
+          .select(`
+            *,
+            feeds!inner(name, category, status),
+            user_articles(is_read, is_pinned)
+          `)
+          .eq('feeds.status', 'active');
+        
+        // Exclure les flux connus
+        if (knownFeedIds.length > 0) {
+          discoveryQuery = discoveryQuery.not('feed_id', 'in', `(${knownFeedIds.join(',')})`);
+        }
+        
+        // Appliquer filtre "lus/non lus" si l'utilisateur a cliqué sur certains articles découverte
+        if (!showReadArticles && user) {
+          discoveryQuery = discoveryQuery.or('user_articles.is.null,user_articles.is_read.eq.false', { referencedTable: 'user_articles' });
+        }
+        
+        discoveryQuery = discoveryQuery
+          .order('published_at', { ascending: false })
+          .limit(100);
+        
+        const { data: discoveryArticles, error: discoveryError } = await discoveryQuery;
+        
+        if (discoveryError) {
+          console.error('❌ Error fetching discovery articles:', discoveryError);
+          toast.error('Erreur lors du chargement des articles en découverte');
+          return;
+        }
+        
+        console.log('✅ Discovery articles loaded:', discoveryArticles?.length || 0);
+        
+        // Formater les articles
+        const formattedArticles = (discoveryArticles || []).map(article => ({
+          id: article.id,
+          title: article.title,
+          description: article.description || '',
+          content: article.content || '',
+          publishedAt: article.published_at,
+          source: article.feeds.name,
+          category: article.feeds.category as 'rss' | 'youtube' | 'steam' | 'actualites',
+          url: article.url || '',
+          imageUrl: article.image_url,
+          isPinned: false,
+          isRead: article.user_articles?.[0]?.is_read || false,
+          feedId: article.feed_id,
+          readTime: article.read_time || 5,
+          isDiscovery: true
+        }));
+        
+        setArticles(formattedArticles);
       } else {
         // For users wanting all articles or visitors - show all articles from all feeds
         console.log('👤 Loading all articles (visitor or showFollowedOnly=false)');
