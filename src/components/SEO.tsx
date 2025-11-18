@@ -17,7 +17,7 @@ export const SEO = ({
   title = 'Feeds.Duhaz.fr - Agrégateur de flux RSS personnalisé',
   description = "Votre flux d'informations personnalisé, simplifié. Agrégez vos flux RSS, YouTube et actualités préférés en un seul endroit.",
   keywords = 'RSS, agrégateur, flux d\'informations, actualités, news feed, personnalisé, YouTube, agrégateur RSS',
-  ogImage = 'https://feeds.duhaz.fr/static/favicon.ico',
+  ogImage = 'https://feeds.duhaz.fr/favicon.ico',
   canonical
 }: SEOProps) => {
   const location = useLocation();
