@@ -11,7 +11,9 @@ import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Gone from "./pages/Gone";
 import Changelog from "./pages/Changelog";
+import PolitiqueCookies from "./pages/PolitiqueCookies";
 import LegacyRedirect from "./components/LegacyRedirect";
+import { CookieBanner } from "./components/CookieBanner";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +30,7 @@ const App = () => (
           <Route path="/feed/:feedId" element={<FeedDetail />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/changelog" element={<Changelog />} />
+          <Route path="/politique-cookies" element={<PolitiqueCookies />} />
           <Route path="/gone" element={<Gone />} />
           
           {/* Legacy URL redirects */}
@@ -37,6 +40,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <CookieBanner />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
