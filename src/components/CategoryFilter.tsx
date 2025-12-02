@@ -1,5 +1,6 @@
-
-import { NewsCategory } from '@/types/news';
+import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { NewsCategory, NewsItem } from '@/types/news';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -21,9 +22,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { NewsItem } from '@/types/news';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -35,8 +34,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
 
 interface CategoryFilterProps {
   categories: NewsCategory[];
@@ -44,8 +41,8 @@ interface CategoryFilterProps {
   onCategoryChange: (categoryId: string | null) => void;
   newsCount: number;
   pinnedCount?: number;
-  articles: any[]; // Add articles to calculate counts per category
-  pinnedArticles?: NewsItem[]; // Pinned articles to display
+  articles: NewsItem[];
+  pinnedArticles?: NewsItem[];
   dateFilter?: 'today' | 'yesterday' | null;
   onDateFilterChange?: (filter: 'today' | 'yesterday' | null) => void;
   showFollowedOnly?: boolean;
@@ -89,10 +86,14 @@ const CategoryFilter = ({
   const { user } = useAuth();
   const [isPinnedExpanded, setIsPinnedExpanded] = useState(true);
 
-  // Calculate count for each category
-  const getCategoryCount = (categoryType: string) => {
-    return articles.filter(article => article.category === categoryType).length;
-  };
+  // Memoize category counts to avoid recalculation on every render
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const article of articles) {
+      counts[article.category] = (counts[article.category] || 0) + 1;
+    }
+    return counts;
+  }, [articles]);
 
   return (
     <div className="bg-card border rounded-lg p-6 space-y-4">
@@ -116,7 +117,7 @@ const CategoryFilter = ({
         {categories.map((category) => {
           const IconComponent = iconMap[category.icon as keyof typeof iconMap];
           const isSelected = selectedCategory === category.id;
-          const categoryCount = getCategoryCount(category.type);
+          const categoryCount = categoryCounts[category.type] || 0;
           
           return (
             <Button
@@ -383,7 +384,6 @@ const CategoryFilter = ({
           </div>
         </div>
       )}
-
     </div>
   );
 };

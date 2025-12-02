@@ -1,9 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { NewsItem } from '@/types/news';
 import { toast } from 'sonner';
+
+const isDev = import.meta.env.DEV;
 
 export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showFollowedOnly?: boolean, showReadArticles?: boolean, showDiscoveryMode?: boolean) {
   const [articles, setArticles] = useState<NewsItem[]>([]);
@@ -13,7 +14,7 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
   const fetchArticles = async () => {
     try {
       setLoading(true);
-      console.log('🔄 Fetching articles...', { user: !!user, dateFilter, showFollowedOnly });
+      if (isDev) console.log('🔄 Fetching articles...', { user: !!user, dateFilter, showFollowedOnly });
       
       // Calculate date ranges for filtering
       let dateStart = null;
@@ -43,16 +44,14 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
           .eq('is_followed', true);
 
         if (userFeedsError) {
-          console.error('❌ Error fetching user feeds:', userFeedsError);
+          if (isDev) console.error('❌ Error fetching user feeds:', userFeedsError);
           toast.error('Erreur lors du chargement de vos flux');
           return;
         }
 
-        console.log('📋 User followed feeds:', userFeeds);
         const followedFeedIds = userFeeds?.map(uf => uf.feed_id) || [];
         
         if (followedFeedIds.length === 0) {
-          console.log('⚠️ No followed feeds found for user');
           setArticles([]);
           return;
         }
@@ -75,7 +74,7 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
           .order('published_at', { ascending: false })
           .limit(100);
 
-        if (pinnedError) {
+        if (pinnedError && isDev) {
           console.error('❌ Error fetching pinned articles:', pinnedError);
         }
 
@@ -83,7 +82,6 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
         let regularQuery;
         
         if (!showReadArticles) {
-          // Optimize: exclude read articles at SQL level
           regularQuery = supabase
             .from('articles')
             .select(`
@@ -95,7 +93,6 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
             .or(`user_articles.is.null,user_articles.is_read.eq.false`)
             .eq('feeds.status', 'active');
         } else {
-          // Include all articles (read and unread)
           regularQuery = supabase
             .from('articles')
             .select(`
@@ -107,7 +104,6 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
             .eq('feeds.status', 'active');
         }
         
-        // Apply date filter to regular articles only
         if (dateStart && dateEnd) {
           regularQuery = regularQuery.gte('published_at', dateStart).lte('published_at', dateEnd);
         }
@@ -117,7 +113,7 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
           .limit(200);
 
         if (regularError) {
-          console.error('❌ Error fetching regular articles:', regularError);
+          if (isDev) console.error('❌ Error fetching regular articles:', regularError);
           toast.error('Erreur lors du chargement des articles');
           return;
         }
@@ -128,15 +124,7 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
           index === self.findIndex(a => a.id === article.id)
         );
 
-        console.log('📰 Articles found (SQL filtered for read articles):', {
-          pinned: pinnedArticles?.length || 0,
-          regular: regularArticles?.length || 0,
-          unique: uniqueArticles.length,
-          showReadArticles,
-          sqlFiltered: !showReadArticles
-        });
-
-        // Transform to NewsItem format (read articles already filtered at SQL level when showReadArticles=false)
+        // Transform to NewsItem format
         const transformedArticles: NewsItem[] = uniqueArticles
           ?.map(article => ({
             id: article.id,
@@ -157,7 +145,6 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
         setArticles(transformedArticles.slice(0, 100));
       } else if (showDiscoveryMode && user) {
         // ======= MODE DÉCOUVERTE =======
-        console.log('🔍 Discovery mode active');
         
         // 1. Récupérer tous les feed_id que l'utilisateur a déjà interagi avec
         const { data: knownFeeds } = await supabase
@@ -166,7 +153,6 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
           .eq('user_id', user.id);
         
         const knownFeedIds = knownFeeds?.map(f => f.feed_id) || [];
-        console.log('📚 Known feeds to exclude:', knownFeedIds);
         
         // 2. Récupérer uniquement les articles des flux inconnus + actifs
         let discoveryQuery = supabase
@@ -178,12 +164,10 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
           `)
           .eq('feeds.status', 'active');
         
-        // Exclure les flux connus
         if (knownFeedIds.length > 0) {
           discoveryQuery = discoveryQuery.not('feed_id', 'in', `(${knownFeedIds.join(',')})`);
         }
         
-        // Appliquer filtre "lus/non lus" si l'utilisateur a cliqué sur certains articles découverte
         if (!showReadArticles && user) {
           discoveryQuery = discoveryQuery.or('user_articles.is.null,user_articles.is_read.eq.false', { referencedTable: 'user_articles' });
         }
@@ -195,14 +179,11 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
         const { data: discoveryArticles, error: discoveryError } = await discoveryQuery;
         
         if (discoveryError) {
-          console.error('❌ Error fetching discovery articles:', discoveryError);
+          if (isDev) console.error('❌ Error fetching discovery articles:', discoveryError);
           toast.error('Erreur lors du chargement des articles en découverte');
           return;
         }
         
-        console.log('✅ Discovery articles loaded:', discoveryArticles?.length || 0);
-        
-        // Formater les articles
         const formattedArticles = (discoveryArticles || []).map(article => ({
           id: article.id,
           title: article.title,
@@ -222,14 +203,11 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
         
         setArticles(formattedArticles);
       } else {
-        // For users wanting all articles or visitors - show all articles from all feeds
-        console.log('👤 Loading all articles (visitor or showFollowedOnly=false)');
-        
-        let pinnedArticles = [];
-        let regularArticles = [];
+        // For users wanting all articles or visitors
+        let pinnedArticles: any[] = [];
+        let regularArticles: any[] = [];
 
         if (user) {
-          // Fetch pinned articles first (without date filter) for authenticated users
           const pinnedQuery = supabase
             .from('articles')
             .select(`
@@ -245,14 +223,11 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
             .order('published_at', { ascending: false })
             .limit(100);
 
-          if (pinnedError) {
-            console.error('❌ Error fetching pinned articles:', pinnedError);
-          } else {
+          if (!pinnedError) {
             pinnedArticles = pinnedData || [];
           }
         }
 
-        // Fetch regular articles (NO date filter for "All articles" mode)
         let regularQuery = supabase
           .from('articles')
           .select(`
@@ -262,14 +237,12 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
           `)
           .eq('feeds.status', 'active');
         
-        // Don't apply date filter in "All articles" mode - show everything
-        
         const { data: regularData, error: regularError } = await regularQuery
           .order('published_at', { ascending: false })
           .limit(200);
 
         if (regularError) {
-          console.error('❌ Error fetching regular articles:', regularError);
+          if (isDev) console.error('❌ Error fetching regular articles:', regularError);
           toast.error('Erreur lors du chargement des articles');
           return;
         }
@@ -282,27 +255,6 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
           index === self.findIndex(a => a.id === article.id)
         );
 
-        console.log('📰 All articles found:', {
-          pinned: pinnedArticles.length,
-          regular: regularArticles.length,
-          unique: uniqueArticles.length
-        });
-
-        console.log('🔍 Before filtering - Articles details:', {
-          total: uniqueArticles.length,
-          withFeeds: uniqueArticles.filter(a => a.feeds).length,
-          withUserArticles: uniqueArticles.filter(a => a.user_articles && a.user_articles.length > 0).length,
-          readArticles: uniqueArticles.filter(a => a.user_articles?.[0]?.is_read).length,
-          showReadArticles,
-          sampleArticle: uniqueArticles[0] ? {
-            id: uniqueArticles[0].id,
-            title: uniqueArticles[0].title.substring(0, 50),
-            feeds: !!uniqueArticles[0].feeds,
-            userArticles: uniqueArticles[0].user_articles?.length || 0,
-            isRead: uniqueArticles[0].user_articles?.[0]?.is_read
-          } : null
-        });
-
         // Transform to NewsItem format and conditionally filter read articles
         const transformedArticles: NewsItem[] = uniqueArticles
           ?.filter(article => {
@@ -310,14 +262,6 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
             const userArticle = article.user_articles?.[0];
             const isRead = userArticle?.is_read || false;
             const shouldShow = showReadArticles || !isRead;
-            
-            if (!hasFeeds) {
-              console.log('❌ Article filtered out - no feeds:', article.id);
-            }
-            if (!shouldShow) {
-              console.log('❌ Article filtered out - read filter:', article.id, { isRead, showReadArticles });
-            }
-            
             return hasFeeds && shouldShow;
           })
           ?.map(article => ({
@@ -336,20 +280,10 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
             feedId: article.feed_id
            })) || [];
 
-        console.log('✅ After filtering - Final articles:', {
-          transformedCount: transformedArticles.length,
-          sampleTransformed: transformedArticles[0] ? {
-            id: transformedArticles[0].id,
-            title: transformedArticles[0].title.substring(0, 50),
-            isRead: transformedArticles[0].isRead,
-            isPinned: transformedArticles[0].isPinned
-           } : null
-        });
-
         setArticles(transformedArticles.slice(0, 100));
       }
     } catch (error) {
-      console.error('💥 Error in fetchArticles:', error);
+      if (isDev) console.error('💥 Error in fetchArticles:', error);
       toast.error('Erreur lors du chargement des articles');
     } finally {
       setLoading(false);
@@ -388,7 +322,7 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
       
       toast.success(article.isPinned ? "Article retiré des épinglés" : "Article épinglé");
     } catch (error) {
-      console.error('Error toggling pin:', error);
+      if (isDev) console.error('Error toggling pin:', error);
       toast.error('Erreur lors de la mise à jour');
     }
   };
@@ -413,11 +347,10 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
         });
 
       if (error) {
-        console.error('Error marking as read:', error);
+        if (isDev) console.error('Error marking as read:', error);
         return;
       }
 
-      // Update local state: remove if not showing read articles, otherwise mark as read
       if (!showReadArticles) {
         setArticles(prev => prev.filter(item => item.id !== articleId));
         toast.success("Article marqué comme lu");
@@ -426,7 +359,7 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
         toast.success("Article marqué comme lu");
       }
     } catch (error) {
-      console.error('Error marking as read:', error);
+      if (isDev) console.error('Error marking as read:', error);
     }
   };
 
@@ -437,7 +370,6 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
     }
 
     try {
-      // Remove from user's view by deleting user_articles record
       const { error } = await supabase
         .from('user_articles')
         .delete()
@@ -452,7 +384,7 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
       setArticles(prev => prev.filter(item => item.id !== articleId));
       toast.success("Article supprimé de votre vue");
     } catch (error) {
-      console.error('Error deleting article:', error);
+      if (isDev) console.error('Error deleting article:', error);
       toast.error('Erreur lors de la suppression');
     }
   };
@@ -471,12 +403,12 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
 
       if (data.success) {
         toast.success(`${data.articlesProcessed} articles récupérés`);
-        await fetchArticles(); // Refresh articles
+        await fetchArticles();
       } else {
         throw new Error(data.error || 'Erreur lors de la récupération RSS');
       }
     } catch (error) {
-      console.error('Error fetching RSS:', error);
+      if (isDev) console.error('Error fetching RSS:', error);
       toast.error('Erreur lors de la récupération du contenu RSS');
     }
   };
