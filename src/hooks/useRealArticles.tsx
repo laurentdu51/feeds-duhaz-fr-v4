@@ -147,8 +147,8 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
             category: article.feeds.category as NewsItem['category'],
             publishedAt: article.published_at,
             readTime: article.read_time || 5,
-            isPinned: article.user_articles[0]?.is_pinned || false,
-            isRead: article.user_articles[0]?.is_read || false,
+            isPinned: article.user_articles?.[0]?.is_pinned || false,
+            isRead: article.user_articles?.[0]?.is_read || false,
             url: article.url || undefined,
             imageUrl: article.image_url || undefined,
             feedId: article.feed_id
@@ -329,8 +329,8 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
             category: article.feeds.category as NewsItem['category'],
             publishedAt: article.published_at,
             readTime: article.read_time || 5,
-            isPinned: user ? (article.user_articles[0]?.is_pinned || false) : false,
-            isRead: user ? (article.user_articles[0]?.is_read || false) : false,
+            isPinned: user ? (article.user_articles?.[0]?.is_pinned || false) : false,
+            isRead: user ? (article.user_articles?.[0]?.is_read || false) : false,
             url: article.url || undefined,
             imageUrl: article.image_url || undefined,
             feedId: article.feed_id

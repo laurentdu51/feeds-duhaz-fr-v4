@@ -4,23 +4,42 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { X } from 'lucide-react';
 
+const COOKIE_CONSENT_KEY = 'cookie-consent';
+
+const getStorageItem = (key: string): string | null => {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+
+const setStorageItem = (key: string, value: string): boolean => {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export function CookieBanner() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const consent = localStorage.getItem('cookie-consent');
+    const consent = getStorageItem(COOKIE_CONSENT_KEY);
     if (!consent) {
       setIsVisible(true);
     }
   }, []);
 
   const handleAccept = () => {
-    localStorage.setItem('cookie-consent', 'accepted');
+    setStorageItem(COOKIE_CONSENT_KEY, 'accepted');
     setIsVisible(false);
   };
 
   const handleDecline = () => {
-    localStorage.setItem('cookie-consent', 'declined');
+    setStorageItem(COOKIE_CONSENT_KEY, 'declined');
     setIsVisible(false);
   };
 
