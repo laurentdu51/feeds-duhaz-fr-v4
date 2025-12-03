@@ -9,6 +9,20 @@ export interface ChangelogEntry {
 
 export const changelogData: ChangelogEntry[] = [
   {
+    version: "1.7.0",
+    date: "2025-12-03",
+    category: "feature",
+    title: "Pagination des articles",
+    description: "Ajout d'un système de pagination sur la page d'accueil pour améliorer la navigation.",
+    details: [
+      "Affichage de 20 articles par page",
+      "Navigation intuitive avec boutons Précédent/Suivant",
+      "Indicateur de page courante et nombre total",
+      "Réinitialisation automatique lors du changement de filtres",
+      "Suppression des notifications 'Article marqué comme lu'"
+    ]
+  },
+  {
     version: "1.6.0",
     date: "2025-12-03",
     category: "improvement",
