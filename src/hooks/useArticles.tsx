@@ -69,7 +69,6 @@ export function useArticles() {
     setArticles(prev => prev.map(item => 
       item.id === id ? { ...item, isRead: true } : item
     ));
-    toast.success("Article marqué comme lu");
   };
 
   const deleteArticle = (id: string) => {

@@ -353,10 +353,8 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
 
       if (!showReadArticles) {
         setArticles(prev => prev.filter(item => item.id !== articleId));
-        toast.success("Article marqué comme lu");
       } else {
         setArticles(prev => prev.map(item => item.id === articleId ? { ...item, isRead: true } : item));
-        toast.success("Article marqué comme lu");
       }
     } catch (error) {
       if (isDev) console.error('Error marking as read:', error);
