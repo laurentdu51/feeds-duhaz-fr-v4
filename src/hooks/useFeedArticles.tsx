@@ -169,7 +169,6 @@ export function useFeedArticles(feedId: string, page: number = 1) {
       setArticles(prev => prev.map(item => 
         item.id === articleId ? { ...item, isRead: true } : item
       ));
-      toast.success("Article marqué comme lu");
     } catch (error) {
       console.error('Error marking as read:', error);
     }
