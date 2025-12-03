@@ -11,11 +11,13 @@ import AddFeedModal from '@/components/AddFeedModal';
 import ArticleModal from '@/components/ArticleModal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
-import { RefreshCw, Filter, User, Rss, Plus } from 'lucide-react';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from '@/components/ui/pagination';
+import { RefreshCw, Filter, Rss, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link, useNavigate } from 'react-router-dom';
+
+const ARTICLES_PER_PAGE = 20;
 const Index = () => {
   const {
     user
@@ -60,6 +62,7 @@ const Index = () => {
   const [isAddFeedModalOpen, setIsAddFeedModalOpen] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null);
   const [isArticleModalOpen, setIsArticleModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   console.log('🏠 Index page - Articles count:', articles.length, 'Loading:', loading, 'User:', !!user);
   const filteredNews = useMemo(() => {
     let filtered = articles;
@@ -87,6 +90,19 @@ const Index = () => {
   const regularArticles = useMemo(() => {
     return filteredNews.filter(article => !article.isPinned);
   }, [filteredNews]);
+
+  // Pagination logic
+  const totalPages = Math.ceil(regularArticles.length / ARTICLES_PER_PAGE);
+  const paginatedArticles = useMemo(() => {
+    const startIndex = (currentPage - 1) * ARTICLES_PER_PAGE;
+    return regularArticles.slice(startIndex, startIndex + ARTICLES_PER_PAGE);
+  }, [regularArticles, currentPage]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, searchQuery, dateFilter, showFollowedOnly, showDiscoveryMode, showReadArticles]);
+
   const pinnedCount = articles.filter(item => item.isPinned).length;
   const unreadCount = articles.filter(item => !item.isRead).length;
 
@@ -313,7 +329,56 @@ const Index = () => {
                     </Button>
                   </div>}
               </div> : <div className="space-y-4">
-                {regularArticles.map(item => <NewsCard key={item.id} news={item} onTogglePin={togglePin} onMarkAsRead={markAsRead} onDelete={deleteArticle} onOpenArticle={handleOpenArticle} onSourceClick={handleSourceClick} isDiscoveryMode={showDiscoveryMode} />)}
+                {paginatedArticles.map(item => <NewsCard key={item.id} news={item} onTogglePin={togglePin} onMarkAsRead={markAsRead} onDelete={deleteArticle} onOpenArticle={handleOpenArticle} onSourceClick={handleSourceClick} isDiscoveryMode={showDiscoveryMode} />)}
+                
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <Pagination className="mt-8">
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious 
+                          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                          className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                        />
+                      </PaginationItem>
+                      
+                      {Array.from({ length: totalPages }, (_, i) => i + 1)
+                        .filter(page => page === 1 || page === totalPages || Math.abs(page - currentPage) <= 1)
+                        .map((page, index, array) => (
+                          <>
+                            {index > 0 && array[index - 1] !== page - 1 && (
+                              <PaginationItem key={`ellipsis-${page}`}>
+                                <PaginationEllipsis />
+                              </PaginationItem>
+                            )}
+                            <PaginationItem key={page}>
+                              <PaginationLink
+                                onClick={() => setCurrentPage(page)}
+                                isActive={currentPage === page}
+                                className="cursor-pointer"
+                              >
+                                {page}
+                              </PaginationLink>
+                            </PaginationItem>
+                          </>
+                        ))}
+                      
+                      <PaginationItem>
+                        <PaginationNext 
+                          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                          className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                )}
+                
+                {/* Info pagination */}
+                {totalPages > 1 && (
+                  <p className="text-center text-sm text-muted-foreground">
+                    Page {currentPage} sur {totalPages} ({regularArticles.length} articles)
+                  </p>
+                )}
               </div>}
           </div>
         </div>
