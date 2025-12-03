@@ -9,6 +9,33 @@ export interface ChangelogEntry {
 
 export const changelogData: ChangelogEntry[] = [
   {
+    version: "1.6.0",
+    date: "2025-12-03",
+    category: "improvement",
+    title: "Optimisations de performance",
+    description: "Amélioration significative des performances et de la qualité du code.",
+    details: [
+      "Memoization du décodage HTML avec cache LRU",
+      "Lazy loading des images pour un chargement plus rapide",
+      "Suppression des logs de debug en production",
+      "Amélioration du typage TypeScript",
+      "Optimisation des calculs de filtres avec useMemo"
+    ]
+  },
+  {
+    version: "1.5.0",
+    date: "2025-12-02",
+    category: "security",
+    title: "Renforcement de la sécurité RLS",
+    description: "Correction et amélioration des politiques de sécurité Row Level Security.",
+    details: [
+      "Restriction des modifications de flux aux super-utilisateurs",
+      "Protection de la table super_users contre les accès non autorisés",
+      "Correction des accès null-safe sur les données utilisateur",
+      "Gestion des erreurs localStorage améliorée"
+    ]
+  },
+  {
     version: "1.4.0",
     date: "2025-01-14",
     category: "improvement",
