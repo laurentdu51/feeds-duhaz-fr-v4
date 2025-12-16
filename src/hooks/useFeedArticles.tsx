@@ -93,7 +93,8 @@ export function useFeedArticles(feedId: string, page: number = 1) {
           isRead: user ? (article.user_articles[0]?.is_read || false) : false,
           url: article.url || undefined,
           imageUrl: article.image_url || undefined,
-          feedId: article.feed_id
+          feedId: article.feed_id,
+          lastSeenAt: article.last_seen_at || undefined
         })) || [];
 
       setArticles(transformedArticles.slice(0, ARTICLES_PER_PAGE));

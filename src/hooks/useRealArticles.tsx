@@ -139,7 +139,8 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
             isRead: article.user_articles?.[0]?.is_read || false,
             url: article.url || undefined,
             imageUrl: article.image_url || undefined,
-            feedId: article.feed_id
+            feedId: article.feed_id,
+            lastSeenAt: article.last_seen_at || undefined
           })) || [];
 
         setArticles(transformedArticles.slice(0, 100));
@@ -198,7 +199,8 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
           isRead: article.user_articles?.[0]?.is_read || false,
           feedId: article.feed_id,
           readTime: article.read_time || 5,
-          isDiscovery: true
+          isDiscovery: true,
+          lastSeenAt: article.last_seen_at || undefined
         }));
         
         setArticles(formattedArticles);
@@ -277,7 +279,8 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
             isRead: user ? (article.user_articles?.[0]?.is_read || false) : false,
             url: article.url || undefined,
             imageUrl: article.image_url || undefined,
-            feedId: article.feed_id
+            feedId: article.feed_id,
+            lastSeenAt: article.last_seen_at || undefined
            })) || [];
 
         setArticles(transformedArticles.slice(0, 100));
