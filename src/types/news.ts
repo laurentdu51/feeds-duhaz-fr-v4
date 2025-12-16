@@ -14,6 +14,7 @@ export interface NewsItem {
   imageUrl?: string;
   feedId?: string;
   isDiscovery?: boolean;
+  lastSeenAt?: string;
 }
 
 export interface NewsCategory {

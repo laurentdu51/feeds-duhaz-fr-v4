@@ -152,6 +152,7 @@ serve(async (req) => {
     console.log(`Parsed ${items.length} items from RSS feed`)
 
     // Save articles to database
+    const now = new Date().toISOString();
     const articlesToInsert = items.map(item => {
       // Calculate read time (rough estimate: 200 words per minute)
       const wordCount = (item.description || '').split(' ').length
@@ -179,18 +180,18 @@ serve(async (req) => {
         image_url: item.image || null,
         published_at: publishedAt,
         guid: item.guid,
-        read_time: readTime
+        read_time: readTime,
+        last_seen_at: now
       }
     })
 
     console.log(`Preparing to insert ${articlesToInsert.length} articles`)
 
-    // Insert articles (on conflict do nothing to avoid duplicates)
+    // Insert articles - on conflict update last_seen_at
     const { error: insertError } = await supabaseClient
       .from('articles')
       .upsert(articlesToInsert, { 
-        onConflict: 'feed_id,guid',
-        ignoreDuplicates: true 
+        onConflict: 'feed_id,guid'
       })
 
     if (insertError) {

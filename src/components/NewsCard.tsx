@@ -2,10 +2,25 @@ import { NewsItem } from '@/types/news';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Clock, Pin, ExternalLink, Eye, Trash2, Copy, Rss, Youtube, Gamepad2, Newspaper } from 'lucide-react';
+import { Clock, Pin, ExternalLink, Eye, Trash2, Copy, Rss, Youtube, Gamepad2, Newspaper, Radio } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { decodeHtmlEntities } from '@/utils/htmlDecode';
+
+const formatRelativeTime = (dateString: string): string => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 1) return "à l'instant";
+  if (diffMins < 60) return `il y a ${diffMins}min`;
+  if (diffHours < 24) return `il y a ${diffHours}h`;
+  if (diffDays < 7) return `il y a ${diffDays}j`;
+  return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+};
 
 interface NewsCardProps {
   news: NewsItem;
@@ -134,7 +149,7 @@ const NewsCard = ({
         </div>
         
         <div className="flex items-center justify-between pt-2">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
             <Badge 
               variant="outline" 
               className={cn(
@@ -158,6 +173,12 @@ const NewsCard = ({
                 minute: '2-digit'
               })}
             </span>
+            {news.lastSeenAt && (
+              <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                <Radio className="h-3 w-3" />
+                Vu {formatRelativeTime(news.lastSeenAt)}
+              </span>
+            )}
           </div>
           
           <div className="flex items-center gap-2">
