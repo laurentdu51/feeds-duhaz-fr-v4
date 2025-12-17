@@ -9,6 +9,19 @@ export interface ChangelogEntry {
 
 export const changelogData: ChangelogEntry[] = [
   {
+    version: "1.8.0",
+    date: "2025-12-17",
+    category: "improvement",
+    title: "Amélioration de la purge des articles",
+    description: "Refonte de la logique de suppression automatique des anciens articles pour une meilleure rétention du contenu pertinent.",
+    details: [
+      "Critère basé sur last_seen_at (non vu dans le flux RSS depuis 48h)",
+      "Protection de tous les articles consultés par au moins un utilisateur",
+      "Suppression du critère arbitraire des 20 lectures minimum",
+      "Meilleure préservation du contenu engageant"
+    ]
+  },
+  {
     version: "1.7.0",
     date: "2025-12-03",
     category: "feature",
