@@ -6,7 +6,7 @@
  */
 
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-import { Resend } from "npm:resend@2.0.0";
+import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -157,13 +157,8 @@ const handler = async (req: Request): Promise<Response> => {
             <div class="criteria">
               <h3>📋 Critères de purge appliqués</h3>
               <ul>
-                <li><strong>Âge des articles :</strong> Plus de 48 heures (2 jours)</li>
-                <li><strong>Articles préservés :</strong> 
-                  <ul>
-                    <li>Articles épinglés par au moins un utilisateur</li>
-                    <li>Articles avec plus de 20 lectures</li>
-                  </ul>
-                </li>
+                <li><strong>Critère principal :</strong> Non vu dans le flux RSS depuis 48 heures</li>
+                <li><strong>Articles préservés :</strong> Tous les articles ayant été consultés par au moins un utilisateur</li>
                 <li><strong>Fréquence :</strong> Tous les jours à 3h00 du matin</li>
               </ul>
             </div>
