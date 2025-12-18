@@ -61,7 +61,7 @@ export function useFeedArticles(feedId: string, page: number = 1) {
         .from('articles')
         .select(`
           *,
-          feeds!inner(name, category),
+          feeds!inner(name, category, type),
           user_articles(is_read, is_pinned)
         `)
         .eq('feed_id', feedId)
@@ -86,7 +86,7 @@ export function useFeedArticles(feedId: string, page: number = 1) {
           description: article.description || '',
           content: article.content || '',
           source: article.feeds.name,
-          category: article.feeds.category as NewsItem['category'],
+          category: article.feeds.type as NewsItem['category'],
           publishedAt: article.published_at,
           readTime: article.read_time || 5,
           isPinned: user ? (article.user_articles[0]?.is_pinned || false) : false,

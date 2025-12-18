@@ -96,7 +96,7 @@ serve(async (req) => {
           }
         } catch (error) {
           // Ignore errors for fallback checks
-          console.log(`Failed to check ${testUrl}:`, error.message);
+          console.log(`Failed to check ${testUrl}:`, (error as Error).message);
         }
       }
     }
@@ -130,7 +130,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: false,
-        error: error.message || 'Failed to detect RSS feed' 
+        error: (error as Error).message || 'Failed to detect RSS feed' 
       }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

@@ -61,7 +61,7 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
           .from('articles')
           .select(`
             *,
-            feeds!inner(name, category, status),
+            feeds!inner(name, category, type, status),
             user_articles!inner(is_read, is_pinned)
           `)
           .in('feed_id', followedFeedIds)
@@ -86,7 +86,7 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
             .from('articles')
             .select(`
               *,
-              feeds!inner(name, category, status),
+              feeds!inner(name, category, type, status),
               user_articles!left(is_read, is_pinned)
             `)
             .in('feed_id', followedFeedIds)
@@ -97,7 +97,7 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
             .from('articles')
             .select(`
               *,
-              feeds!inner(name, category, status),
+              feeds!inner(name, category, type, status),
               user_articles(is_read, is_pinned)
             `)
             .in('feed_id', followedFeedIds)
@@ -132,7 +132,7 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
             description: article.description || '',
             content: article.content || '',
             source: article.feeds.name,
-            category: article.feeds.category as NewsItem['category'],
+            category: article.feeds.type as NewsItem['category'],
             publishedAt: article.published_at,
             readTime: article.read_time || 5,
             isPinned: article.user_articles?.[0]?.is_pinned || false,
@@ -160,7 +160,7 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
           .from('articles')
           .select(`
             *,
-            feeds!inner(name, category, status),
+            feeds!inner(name, category, type, status),
             user_articles(is_read, is_pinned)
           `)
           .eq('feeds.status', 'active');
@@ -192,7 +192,7 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
           content: article.content || '',
           publishedAt: article.published_at,
           source: article.feeds.name,
-          category: article.feeds.category as 'rss' | 'youtube' | 'steam' | 'actualites',
+          category: article.feeds.type as 'rss' | 'youtube' | 'steam' | 'actualites',
           url: article.url || '',
           imageUrl: article.image_url,
           isPinned: false,
@@ -214,7 +214,7 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
             .from('articles')
             .select(`
               *,
-              feeds!inner(name, category, status),
+              feeds!inner(name, category, type, status),
               user_articles!inner(is_read, is_pinned)
             `)
             .eq('user_articles.user_id', user.id)
@@ -234,7 +234,7 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
           .from('articles')
           .select(`
             *,
-            feeds!inner(name, category, status),
+            feeds!inner(name, category, type, status),
             user_articles(is_read, is_pinned)
           `)
           .eq('feeds.status', 'active');
@@ -272,7 +272,7 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
             description: article.description || '',
             content: article.content || '',
             source: article.feeds.name,
-            category: article.feeds.category as NewsItem['category'],
+            category: article.feeds.type as NewsItem['category'],
             publishedAt: article.published_at,
             readTime: article.read_time || 5,
             isPinned: user ? (article.user_articles?.[0]?.is_pinned || false) : false,
