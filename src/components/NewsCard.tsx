@@ -128,7 +128,7 @@ const NewsCard = ({
       
       <CardContent className="space-y-4" onClick={handleCardClick}>
         <div className="space-y-3">
-          {news.imageUrl && news.category !== 'youtube' && (
+          {news.imageUrl && (
             <div className="w-full">
               <img
                 src={news.imageUrl}
