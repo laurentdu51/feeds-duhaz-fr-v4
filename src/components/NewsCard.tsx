@@ -2,7 +2,7 @@ import { NewsItem } from '@/types/news';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Clock, Pin, ExternalLink, Eye, Trash2, Copy, Rss, Youtube, Gamepad2, Newspaper, Radio } from 'lucide-react';
+import { Clock, Pin, ExternalLink, Eye, Trash2, Copy, Rss, Youtube, Gamepad2, Newspaper, Radio, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { decodeHtmlEntities } from '@/utils/htmlDecode';
@@ -129,13 +129,20 @@ const NewsCard = ({
       <CardContent className="space-y-4" onClick={handleCardClick}>
         <div className="space-y-3">
           {news.imageUrl && (
-            <div className="w-full">
+            <div className="relative w-full">
               <img
                 src={news.imageUrl}
                 alt={news.title}
                 className="w-full h-48 object-cover rounded-md"
                 loading="lazy"
               />
+              {news.category === 'youtube' && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="bg-red-600 rounded-full p-3 shadow-lg group-hover:scale-110 transition-transform">
+                    <Play className="h-8 w-8 text-white fill-white" />
+                  </div>
+                </div>
+              )}
             </div>
           )}
           
