@@ -9,6 +9,18 @@ export interface ChangelogEntry {
 
 export const changelogData: ChangelogEntry[] = [
   {
+    version: "1.8.1",
+    date: "2025-12-20",
+    category: "bugfix",
+    title: "Affichage des miniatures YouTube",
+    description: "Correction de l'affichage des miniatures pour les vidéos YouTube dans les cartes d'articles.",
+    details: [
+      "Les miniatures YouTube s'affichent maintenant dans les cartes",
+      "Normalisation des types de flux RSS (rss-manual/rss-auto → rss)",
+      "Icônes de catégorie correctement affichées"
+    ]
+  },
+  {
     version: "1.8.0",
     date: "2025-12-17",
     category: "improvement",
