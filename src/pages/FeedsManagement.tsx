@@ -321,9 +321,9 @@ const FeedsManagement = () => {
                 </Button>
               </Link>
               <div>
-                <h1 className="text-2xl font-bold">Gestion des flux</h1>
+                <h1 className="text-2xl font-bold">Flux disponibles</h1>
                 <p className="text-muted-foreground">
-                  {user ? 'Gérez vos flux RSS et sources d\'actualités' : 'Découvrez nos flux RSS disponibles'}
+                  {user ? 'Gérez vos abonnements et découvrez de nouveaux flux' : 'Découvrez nos flux RSS disponibles'}
                 </p>
               </div>
             </div>
