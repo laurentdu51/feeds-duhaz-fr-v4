@@ -9,6 +9,18 @@ export interface ChangelogEntry {
 
 export const changelogData: ChangelogEntry[] = [
   {
+    version: "1.8.2",
+    date: "2026-01-05",
+    category: "improvement",
+    title: "Renommage de la page Flux",
+    description: "La page 'Gestion des flux' a été renommée en 'Flux disponibles' pour plus de clarté.",
+    details: [
+      "Nouveau titre : 'Flux disponibles'",
+      "Mise à jour des liens de navigation (desktop et mobile)",
+      "Sous-titre adapté pour les utilisateurs connectés"
+    ]
+  },
+  {
     version: "1.8.1",
     date: "2025-12-20",
     category: "bugfix",

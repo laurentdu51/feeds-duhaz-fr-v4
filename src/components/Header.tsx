@@ -85,7 +85,7 @@ const Header = ({
                   <Link to="/feeds">
                     <Button variant="outline" size="sm" className="gap-2">
                       <List className="h-4 w-4" />
-                      <span className="hidden lg:inline">Gérer les flux</span>
+                      <span className="hidden lg:inline">Flux disponibles</span>
                     </Button>
                   </Link>
                   
@@ -182,7 +182,7 @@ const Header = ({
                         <Link to="/feeds" onClick={closeSheet}>
                           <Button variant="ghost" className="w-full justify-start gap-3">
                             <List className="h-4 w-4" />
-                            Gérer les flux
+                            Flux disponibles
                           </Button>
                         </Link>
 
