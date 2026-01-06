@@ -9,6 +9,19 @@ export interface ChangelogEntry {
 
 export const changelogData: ChangelogEntry[] = [
   {
+    version: "1.8.3",
+    date: "2026-01-06",
+    category: "bugfix",
+    title: "Correction de l'affichage des noms de source",
+    description: "Correction du décodage HTML et de la mise en page des badges source dans les cartes d'articles.",
+    details: [
+      "Décodage des entités HTML dans les noms de source (ex: &#039; → ')",
+      "Limitation de la largeur du badge source avec troncature",
+      "Ajout d'un tooltip pour afficher le nom complet au survol",
+      "Amélioration de la stabilité de la mise en page"
+    ]
+  },
+  {
     version: "1.8.2",
     date: "2026-01-05",
     category: "improvement",
