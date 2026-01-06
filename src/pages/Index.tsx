@@ -115,6 +115,22 @@ const Index = () => {
       document.title = baseTitle;
     }
   }, [unreadCount]);
+
+  // Auto-refresh articles every 5 minutes, paused when article modal is open
+  const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
+  useEffect(() => {
+    if (isArticleModalOpen) {
+      return;
+    }
+
+    const intervalId = setInterval(() => {
+      refetch();
+    }, REFRESH_INTERVAL);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [isArticleModalOpen, refetch]);
   const handleRefresh = () => {
     refetch();
     toast.success("Flux actualisés");
