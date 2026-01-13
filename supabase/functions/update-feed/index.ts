@@ -1,6 +1,6 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { isValidExternalUrl, verifySuperUser } from '../_shared/security.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,11 +13,39 @@ serve(async (req) => {
   }
 
   try {
+    // Authentication: Only super users can update feeds
+    const isSuperUser = await verifySuperUser(req);
+    if (!isSuperUser) {
+      console.log('Unauthorized access attempt to update-feed');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized - Super user access required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     const { feedId, url } = await req.json()
 
-    if (!feedId || !url) {
+    // Input validation
+    if (!feedId || typeof feedId !== 'string') {
       return new Response(
-        JSON.stringify({ error: 'Feed ID and URL are required' }),
+        JSON.stringify({ error: 'Valid Feed ID is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    if (!url || typeof url !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'Valid URL is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // SSRF Protection: Validate URL
+    const urlValidation = isValidExternalUrl(url);
+    if (!urlValidation.valid) {
+      console.log(`SSRF blocked in update-feed: ${url} - ${urlValidation.error}`);
+      return new Response(
+        JSON.stringify({ error: urlValidation.error }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -28,20 +56,49 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
+    // Verify the feed exists
+    const { data: existingFeed, error: feedCheckError } = await supabase
+      .from('feeds')
+      .select('id')
+      .eq('id', feedId)
+      .single()
+
+    if (feedCheckError || !existingFeed) {
+      return new Response(
+        JSON.stringify({ error: 'Feed not found' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     console.log(`Fetching RSS feed from: ${url}`)
 
-    // Fetch RSS feed
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; RSS Feed Updater/1.0)'
-      }
-    })
+    // Fetch RSS feed with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
+    let response;
+    try {
+      response = await fetch(url, {
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; RSS Feed Updater/1.0)'
+        }
+      })
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
 
     const rssText = await response.text()
+    
+    // Limit content size
+    if (rssText.length > 5 * 1024 * 1024) { // 5MB limit
+      throw new Error('RSS feed content too large');
+    }
+    
     console.log('RSS content fetched successfully')
 
     // Parse RSS content to extract metadata
@@ -119,7 +176,7 @@ serve(async (req) => {
   } catch (error: any) {
     console.error('Error updating feed:', error)
     return new Response(
-      JSON.stringify({ error: error?.message || 'Unknown error' }),
+      JSON.stringify({ error: 'An error occurred while updating the feed' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
