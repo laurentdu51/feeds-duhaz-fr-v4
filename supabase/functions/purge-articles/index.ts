@@ -1,16 +1,18 @@
 /**
  * Purge Articles Edge Function
- * Version: 2.0
- * Last updated: 2025-01-20
+ * Version: 2.1
+ * Last updated: 2026-01-13
  * Purpose: Automatically purge old articles and send email reports to admins
+ * Security: Requires super user authentication or cron secret
  */
 
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { verifySuperUser, validateCronSecret, isInternalCall } from '../_shared/security.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cron-secret',
 };
 
 serve(async (req) => {
@@ -23,6 +25,25 @@ serve(async (req) => {
   }
 
   try {
+    // Authentication: Allow cron jobs, internal calls, or super users
+    const isCronJob = validateCronSecret(req);
+    const isInternal = isInternalCall(req);
+    const isSuperUser = await verifySuperUser(req);
+    
+    if (!isCronJob && !isInternal && !isSuperUser) {
+      console.log('Unauthorized access attempt to purge-articles');
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'Unauthorized - Super user access or cron secret required'
+        }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
     console.log('🗑️ Starting automatic article purge...');
 
     // Create Supabase client
@@ -45,7 +66,7 @@ serve(async (req) => {
     const adminEmails = result.admin_emails;
 
     console.log(`Deleted ${deletedCount} articles`);
-    console.log(`Admin emails:`, adminEmails);
+    console.log(`Admin emails count:`, adminEmails?.length || 0);
 
     // Send email report to admins
     if (adminEmails && adminEmails.length > 0) {
@@ -83,7 +104,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: false,
-        error: error?.message || 'Unknown error'
+        error: 'An error occurred during the purge operation'
       }),
       {
         status: 500,
