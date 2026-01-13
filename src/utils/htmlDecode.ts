@@ -19,10 +19,16 @@ export const decodeHtmlEntities = (text: string): string => {
   const cached = decodeCache.get(text);
   if (cached !== undefined) return cached;
   
-  // Decode using singleton textarea
-  const textarea = getTextarea();
-  textarea.innerHTML = text;
-  const decoded = textarea.value;
+  // Safe decode using DOMParser - prevents XSS by not executing scripts
+  // DOMParser creates an inert document that doesn't execute scripts or load resources
+  let decoded: string;
+  try {
+    const doc = new DOMParser().parseFromString(text, 'text/html');
+    decoded = doc.documentElement.textContent || '';
+  } catch {
+    // Fallback for edge cases - just return the original text
+    decoded = text;
+  }
   
   // Cache the result (with size limit)
   if (decodeCache.size >= MAX_CACHE_SIZE) {

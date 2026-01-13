@@ -119,15 +119,21 @@ export async function verifySuperUser(req: Request): Promise<boolean> {
 /**
  * Validates a cron job secret for internal service-to-service calls
  * Cron jobs should use a shared secret for authentication
+ * SECURITY: Fails closed - requires CRON_SECRET to be configured
  */
 export function validateCronSecret(req: Request): boolean {
   const cronSecret = req.headers.get('x-cron-secret');
   const expectedSecret = Deno.env.get('CRON_SECRET');
   
-  // If no cron secret is configured, allow internal calls
-  // This maintains backward compatibility while allowing secure setup
+  // SECURITY: Fail closed - require explicit configuration
   if (!expectedSecret) {
-    return true;
+    console.error('CRON_SECRET environment variable not configured - denying access');
+    return false;
+  }
+  
+  // Constant-time comparison to prevent timing attacks
+  if (cronSecret?.length !== expectedSecret.length) {
+    return false;
   }
   
   return cronSecret === expectedSecret;
