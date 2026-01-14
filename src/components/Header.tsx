@@ -3,27 +3,66 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Search, Settings, User, Rss, List, LogOut, Shield, Pin, FileText, Menu } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Search, Settings, User, Rss, List, LogOut, Shield, Pin, FileText, Menu, Filter, ChevronDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useSuperUser } from '@/hooks/useSuperUser';
 import { useIsMobile } from '@/hooks/use-mobile';
+import CategoryFilter from '@/components/CategoryFilter';
+import { NewsItem, NewsCategory } from '@/types/news';
 
 interface HeaderProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   pinnedCount: number;
+  // Mobile filter props
+  categories?: NewsCategory[];
+  selectedCategory?: string | null;
+  onCategoryChange?: (category: string | null) => void;
+  articles?: NewsItem[];
+  pinnedArticles?: NewsItem[];
+  dateFilter?: 'today' | 'yesterday' | null;
+  onDateFilterChange?: (filter: 'today' | 'yesterday' | null) => void;
+  showFollowedOnly?: boolean;
+  showDiscoveryMode?: boolean;
+  onViewModeChange?: (mode: 'followed' | 'discovery' | 'all') => void;
+  showReadArticles?: boolean;
+  onShowReadArticlesChange?: (show: boolean) => void;
+  unreadCount?: number;
+  onTogglePin?: (id: string) => void;
+  onMarkAsRead?: (id: string) => void;
+  onDeleteArticle?: (id: string) => void;
+  onOpenArticle?: (article: NewsItem) => void;
 }
 
 const Header = ({
   searchQuery,
   onSearchChange,
-  pinnedCount
+  pinnedCount,
+  categories,
+  selectedCategory,
+  onCategoryChange,
+  articles = [],
+  pinnedArticles = [],
+  dateFilter,
+  onDateFilterChange,
+  showFollowedOnly,
+  showDiscoveryMode,
+  onViewModeChange,
+  showReadArticles,
+  onShowReadArticlesChange,
+  unreadCount = 0,
+  onTogglePin,
+  onMarkAsRead,
+  onDeleteArticle,
+  onOpenArticle,
 }: HeaderProps) => {
   const { user, signOut } = useAuth();
   const { isSuperUser } = useSuperUser();
   const isMobile = useIsMobile();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -156,6 +195,63 @@ const Header = ({
                       className="pl-10"
                     />
                   </div>
+
+                  {/* Filtres section */}
+                  {categories && onCategoryChange && onDateFilterChange && onViewModeChange && onShowReadArticlesChange && onTogglePin && onMarkAsRead && onDeleteArticle && onOpenArticle && (
+                    <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen} className="mb-4">
+                      <CollapsibleTrigger asChild>
+                        <Button variant="outline" className="w-full justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <Filter className="h-4 w-4" />
+                            Filtres
+                          </div>
+                          <ChevronDown className={`h-4 w-4 transition-transform ${isFiltersOpen ? 'rotate-180' : ''}`} />
+                        </Button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="mt-3 space-y-4">
+                        <CategoryFilter 
+                          categories={categories} 
+                          selectedCategory={selectedCategory ?? null} 
+                          onCategoryChange={onCategoryChange} 
+                          newsCount={articles.length} 
+                          pinnedCount={pinnedCount} 
+                          articles={articles}
+                          pinnedArticles={pinnedArticles}
+                          dateFilter={dateFilter ?? null}
+                          onDateFilterChange={onDateFilterChange}
+                          showFollowedOnly={showFollowedOnly ?? false}
+                          showDiscoveryMode={showDiscoveryMode ?? false}
+                          onViewModeChange={onViewModeChange}
+                          showReadArticles={showReadArticles ?? false}
+                          onShowReadArticlesChange={onShowReadArticlesChange}
+                          onTogglePin={onTogglePin}
+                          onMarkAsRead={onMarkAsRead}
+                          onDeleteArticle={onDeleteArticle}
+                          onOpenArticle={onOpenArticle}
+                        />
+                        
+                        <div className="bg-card border rounded-lg p-4 space-y-3">
+                          <h3 className="font-semibold text-sm">Statistiques</h3>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Articles non lus</span>
+                              <Badge variant="outline">{unreadCount}</Badge>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Articles totaux</span>
+                              <Badge variant="outline">{articles.length}</Badge>
+                            </div>
+                            {user && (
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Épinglés</span>
+                                <Badge variant="secondary">{pinnedCount}</Badge>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  )}
 
                   <nav className="flex flex-col gap-2 flex-1">
                     <Link to="/changelog" onClick={closeSheet}>

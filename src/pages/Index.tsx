@@ -11,11 +11,6 @@ import AddFeedModal from '@/components/AddFeedModal';
 import ArticleModal from '@/components/ArticleModal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from '@/components/ui/pagination';
 import { RefreshCw, Filter, Rss, Plus } from 'lucide-react';
 import { toast } from 'sonner';
@@ -164,7 +159,28 @@ const Index = () => {
       </div>;
   }
   return <div className="min-h-screen bg-background">
-      <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} pinnedCount={pinnedCount} />
+      <Header 
+        searchQuery={searchQuery} 
+        onSearchChange={setSearchQuery} 
+        pinnedCount={pinnedCount}
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+        articles={articles}
+        pinnedArticles={pinnedArticles}
+        dateFilter={dateFilter}
+        onDateFilterChange={setDateFilter}
+        showFollowedOnly={showFollowedOnly}
+        showDiscoveryMode={showDiscoveryMode}
+        onViewModeChange={handleViewModeChange}
+        showReadArticles={showReadArticles}
+        onShowReadArticlesChange={setShowReadArticles}
+        unreadCount={unreadCount}
+        onTogglePin={togglePin}
+        onMarkAsRead={markAsRead}
+        onDeleteArticle={deleteArticle}
+        onOpenArticle={handleOpenArticle}
+      />
       
       <main className="container mx-auto px-4 py-6">
         {/* Message pour les utilisateurs non connectés */}
@@ -247,58 +263,6 @@ const Index = () => {
               </div>
               
               <div className="flex items-center gap-2">
-                {/* Mobile Filter Dropdown */}
-                {isMobile && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="gap-2">
-                        <Filter className="h-4 w-4" />
-                        Filtres
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-[320px] max-h-[70vh] overflow-y-auto p-4 space-y-4">
-                      <CategoryFilter 
-                        categories={categories} 
-                        selectedCategory={selectedCategory} 
-                        onCategoryChange={setSelectedCategory} 
-                        newsCount={articles.length} 
-                        pinnedCount={pinnedCount} 
-                        articles={articles}
-                        pinnedArticles={pinnedArticles}
-                        dateFilter={dateFilter}
-                        onDateFilterChange={setDateFilter}
-                        showFollowedOnly={showFollowedOnly}
-                        showDiscoveryMode={showDiscoveryMode}
-                        onViewModeChange={handleViewModeChange}
-                        showReadArticles={showReadArticles}
-                        onShowReadArticlesChange={setShowReadArticles}
-                        onTogglePin={togglePin}
-                        onMarkAsRead={markAsRead}
-                        onDeleteArticle={deleteArticle}
-                        onOpenArticle={handleOpenArticle}
-                      />
-                      
-                      <div className="bg-card border rounded-lg p-4 space-y-3">
-                        <h3 className="font-semibold text-sm">Statistiques</h3>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Articles non lus</span>
-                            <Badge variant="outline">{unreadCount}</Badge>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Articles totaux</span>
-                            <Badge variant="outline">{articles.length}</Badge>
-                          </div>
-                          {user && <div className="flex justify-between">
-                              <span className="text-muted-foreground">Épinglés</span>
-                              <Badge variant="secondary">{pinnedCount}</Badge>
-                            </div>}
-                        </div>
-                      </div>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
-                
                 {/* Desktop Filter Toggle - keep existing logic */}
                 {!isMobile && (
                   <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)} className="lg:hidden gap-2">
