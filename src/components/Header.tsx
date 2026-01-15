@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSuperUser } from '@/hooks/useSuperUser';
 import { useIsMobile } from '@/hooks/use-mobile';
 import CategoryFilter from '@/components/CategoryFilter';
+import ThemeToggle from '@/components/ThemeToggle';
 import { NewsItem, NewsCategory } from '@/types/news';
 
 interface HeaderProps {
@@ -127,6 +128,8 @@ const Header = ({
                       <span className="hidden lg:inline">Flux disponibles</span>
                     </Button>
                   </Link>
+                  
+                  <ThemeToggle />
                   
                   <Button variant="ghost" size="sm">
                     <Settings className="h-4 w-4" />
@@ -286,6 +289,11 @@ const Header = ({
                           <Settings className="h-4 w-4" />
                           Paramètres
                         </Button>
+
+                        <div className="flex items-center justify-between px-4 py-2">
+                          <span className="text-sm">Thème sombre</span>
+                          <ThemeToggle />
+                        </div>
                       </>
                     )}
                   </nav>
