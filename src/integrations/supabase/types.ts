@@ -231,6 +231,8 @@ export type Database = {
           sample_titles: string[]
         }[]
       }
+      trigger_fetch_all_feeds: { Args: never; Returns: undefined }
+      trigger_purge_articles: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
