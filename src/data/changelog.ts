@@ -9,6 +9,60 @@ export interface ChangelogEntry {
 
 export const changelogData: ChangelogEntry[] = [
   {
+    version: "1.10.0",
+    date: "2026-01-16",
+    category: "feature",
+    title: "Thème sombre avec switch",
+    description: "Ajout d'un mode sombre complet avec un switch de basculement accessible dans le header.",
+    details: [
+      "Composant ThemeToggle avec next-themes",
+      "Switch accessible dans le header desktop et menu mobile",
+      "Support du thème système par défaut",
+      "Icônes dynamiques Soleil/Lune selon le thème actif",
+      "Persistance du choix utilisateur dans le navigateur"
+    ]
+  },
+  {
+    version: "1.9.1",
+    date: "2026-01-15",
+    category: "security",
+    title: "Sécurisation des tâches automatisées",
+    description: "Mise en place d'une authentification sécurisée pour les cron jobs PostgreSQL.",
+    details: [
+      "Création de la table app_secrets pour les secrets applicatifs",
+      "Protection RLS stricte (aucun accès direct possible)",
+      "Authentification des fonctions trigger via x-cron-secret",
+      "Lecture sécurisée des secrets via fonctions SECURITY DEFINER"
+    ]
+  },
+  {
+    version: "1.9.0",
+    date: "2026-01-15",
+    category: "improvement",
+    title: "Automatisation des tâches planifiées",
+    description: "Mise en place de cron jobs PostgreSQL pour automatiser la maintenance de la base de données.",
+    details: [
+      "Cron jobs PostgreSQL avec extension pg_cron",
+      "Récupération automatique des flux RSS toutes les 10 minutes",
+      "Purge automatique des anciens articles à 3h du matin",
+      "Fonctions trigger dédiées (trigger_fetch_all_feeds, trigger_purge_articles)",
+      "Rapport de purge envoyé par email aux administrateurs"
+    ]
+  },
+  {
+    version: "1.8.4",
+    date: "2026-01-13",
+    category: "security",
+    title: "Protection renforcée des données",
+    description: "Renforcement des politiques de sécurité pour protéger les données sensibles.",
+    details: [
+      "Authentification requise pour accéder aux articles",
+      "Protection de la table super_users contre les accès directs",
+      "Vérification du statut admin via fonction is_super_user()",
+      "Renforcement des politiques RLS existantes"
+    ]
+  },
+  {
     version: "1.8.3",
     date: "2026-01-06",
     category: "bugfix",
