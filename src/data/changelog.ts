@@ -9,6 +9,23 @@ export interface ChangelogEntry {
 
 export const changelogData: ChangelogEntry[] = [
   {
+    version: "1.11.0",
+    date: "2026-01-19",
+    category: "improvement",
+    title: "Thème sombre amélioré et compteur d'abonnés",
+    description: "Refonte du thème sombre pour une meilleure lisibilité et affichage du nombre d'abonnés par flux.",
+    details: [
+      "Palette de couleurs sombres plus douce (bleu-gris au lieu de noir pur)",
+      "Meilleur contraste et hiérarchie visuelle des cartes",
+      "Bordures plus visibles pour délimiter les éléments",
+      "Toggle de thème animé avec icônes soleil/lune colorées",
+      "Label textuel du mode actuel (Sombre/Clair)",
+      "Nouveau compteur d'abonnés visible pour chaque flux",
+      "Statistique globale du total d'abonnements",
+      "Accès public aux articles pour les visiteurs non connectés"
+    ]
+  },
+  {
     version: "1.10.0",
     date: "2026-01-16",
     category: "feature",
