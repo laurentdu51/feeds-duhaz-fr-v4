@@ -10,4 +10,5 @@ export interface Feed {
   lastUpdated: string;
   articleCount: number;
   status: 'active' | 'error' | 'pending';
+  subscriberCount?: number;
 }

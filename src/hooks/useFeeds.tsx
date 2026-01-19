@@ -26,6 +26,14 @@ export function useFeeds() {
         return;
       }
 
+      // Fetch subscriber counts (accessible to everyone via SECURITY DEFINER function)
+      const { data: subscriberCounts, error: subscriberError } = await supabase
+        .rpc('get_feed_subscriber_counts');
+
+      if (subscriberError) {
+        console.error('Error fetching subscriber counts:', subscriberError);
+      }
+
       // If user is authenticated, fetch their subscriptions
       let userFeedsData = null;
       if (user) {
@@ -41,7 +49,7 @@ export function useFeeds() {
         }
       }
 
-      // Combine feeds with user subscription status
+      // Combine feeds with user subscription status and subscriber counts
       const combinedFeeds = feedsData.map(feed => ({
         id: feed.id,
         name: feed.name,
@@ -52,7 +60,8 @@ export function useFeeds() {
         isFollowed: userFeedsData?.find(uf => uf.feed_id === feed.id)?.is_followed || false,
         lastUpdated: feed.last_updated || feed.created_at,
         articleCount: feed.article_count || 0,
-        status: feed.status as Feed['status']
+        status: feed.status as Feed['status'],
+        subscriberCount: Number(subscriberCounts?.find(sc => sc.feed_id === feed.id)?.subscriber_count) || 0
       }));
 
       setFeeds(combinedFeeds);
