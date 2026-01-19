@@ -235,6 +235,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_feed_subscriber_counts: {
+        Args: never
+        Returns: {
+          feed_id: string
+          subscriber_count: number
+        }[]
+      }
       is_super_user: { Args: { user_email?: string }; Returns: boolean }
       purge_old_articles: {
         Args: never

@@ -32,7 +32,8 @@ import {
   User,
   RefreshCw,
   Edit,
-  Timer
+  Timer,
+  Users
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import AddFeedModal from '@/components/AddFeedModal';
@@ -287,6 +288,7 @@ const FeedsManagement = () => {
   const followedCount = feeds.filter(f => f.isFollowed).length;
   const activeCount = feeds.filter(f => f.status === 'active').length;
   const errorCount = feeds.filter(f => f.status === 'error').length;
+  const totalSubscribers = feeds.reduce((sum, f) => sum + (f.subscriberCount || 0), 0);
 
   const feedTypes = [
     { value: 'website', label: 'Sites web', icon: Globe },
@@ -353,13 +355,24 @@ const FeedsManagement = () => {
         <div className="space-y-6">
 
           {/* Statistiques */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium">Total flux</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{feeds.length}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-1">
+                  <Users className="h-4 w-4" />
+                  Abonnements
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-purple-600">{totalSubscribers}</div>
               </CardContent>
             </Card>
             {user && (
@@ -509,6 +522,12 @@ const FeedsManagement = () => {
                       <TableHead>Type</TableHead>
                       <TableHead>Statut</TableHead>
                       <TableHead>Articles</TableHead>
+                      <TableHead className="text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          <Users className="h-4 w-4" />
+                          Abonnés
+                        </div>
+                      </TableHead>
                       <TableHead>Dernière MAJ</TableHead>
                       {user && <TableHead>Suivi</TableHead>}
                       <TableHead>Actions</TableHead>
@@ -557,19 +576,25 @@ const FeedsManagement = () => {
                              </div>
                            </TableCell>
                            <TableCell>
-                             <Badge variant="secondary">{feed.articleCount}</Badge>
-                           </TableCell>
-                           <TableCell>
-                             <div className="text-sm">
-                               {new Date(feed.lastUpdated).toLocaleDateString('fr-FR', {
-                                 day: '2-digit',
-                                 month: '2-digit',
-                                 year: 'numeric',
-                                 hour: '2-digit',
-                                 minute: '2-digit'
-                               })}
-                             </div>
-                           </TableCell>
+                              <Badge variant="secondary">{feed.articleCount}</Badge>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                                <Users className="h-3 w-3 mr-1" />
+                                {feed.subscriberCount || 0}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm">
+                                {new Date(feed.lastUpdated).toLocaleDateString('fr-FR', {
+                                  day: '2-digit',
+                                  month: '2-digit',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </div>
+                            </TableCell>
                            {user && (
                              <TableCell>
                                <Switch
