@@ -62,6 +62,21 @@ const getSourceColor = (category: string) => {
   }
 };
 
+const getBorderColor = (category: string) => {
+  switch (category) {
+    case 'rss':
+      return 'border-l-blue-500';
+    case 'youtube':
+      return 'border-l-red-500';
+    case 'steam':
+      return 'border-l-gray-500';
+    case 'actualites':
+      return 'border-l-green-500';
+    default:
+      return 'border-l-blue-500';
+  }
+};
+
 const NewsCard = ({
   news,
   onTogglePin,
@@ -80,10 +95,10 @@ const NewsCard = ({
   return (
     <Card className={cn(
       "group hover:shadow-lg transition-all duration-300 border-l-4 cursor-pointer",
+      getBorderColor(news.category),
       news.isPinned && "border-l-yellow-500",
       isDiscoveryMode && "border-l-purple-500",
-      news.isRead && "opacity-75",
-      !news.isRead && !isDiscoveryMode && "border-l-primary"
+      news.isRead && "opacity-75"
     )}>
       <CardHeader className="space-y-3">
         <div className="flex items-start justify-between gap-4">
