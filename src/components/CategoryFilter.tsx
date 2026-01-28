@@ -270,11 +270,11 @@ const CategoryFilter = ({
                         Aucun article épinglé
                       </div>
                     ) : (
-                      <div className="space-y-2">
+                      <div className="space-y-2 overflow-hidden">
                         {pinnedArticles.slice(0, 3).map((article) => (
                           <div
                             key={article.id}
-                            className="border rounded-lg p-3 bg-card hover:bg-muted/50 transition-colors"
+                            className="border rounded-lg p-3 bg-card hover:bg-muted/50 transition-colors overflow-hidden"
                           >
                             <div className="flex items-start gap-2">
                               <div 
