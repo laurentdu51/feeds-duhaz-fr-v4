@@ -9,6 +9,20 @@ export interface ChangelogEntry {
 
 export const changelogData: ChangelogEntry[] = [
   {
+    version: "1.12.0",
+    date: "2026-01-29",
+    category: "improvement",
+    title: "Purge optimisée des anciens articles",
+    description: "Amélioration de la logique de suppression automatique pour une base de données plus légère.",
+    details: [
+      "Les articles lus mais non épinglés sont maintenant supprimés après 48h",
+      "Seuls les articles épinglés sont protégés de la purge",
+      "Suppression en cascade des interactions utilisateur avant les articles",
+      "Limite de 1000 articles par exécution pour éviter les timeouts",
+      "Réduction estimée de ~6 400 articles obsolètes"
+    ]
+  },
+  {
     version: "1.11.0",
     date: "2026-01-19",
     category: "improvement",
