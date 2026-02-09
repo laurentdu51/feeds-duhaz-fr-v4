@@ -1,20 +1,51 @@
-# Plan terminé ✅
 
-## Modification de la purge des articles
 
-La migration a été appliquée avec succès le 2026-01-29.
+## Proteger les articles non lus des abonnements actifs
 
-### Nouvelle logique
+### Nouvelle regle de purge
 
-- **Supprimer** : Articles non vus dans les flux depuis 48h+ ET non épinglés
-- **Protéger** : Uniquement les articles épinglés
+| Statut | Abonnement actif | Action |
+|--------|-------------------|--------|
+| Epingle | Peu importe | Protege |
+| Non lu + Non epingle | Oui (au moins 1 abonne) | Protege |
+| Non lu + Non epingle | Non (aucun abonne) | Supprime |
+| Lu + Non epingle | Peu importe | Supprime |
 
-### Résultat du test
+### Impact estime (donnees actuelles)
 
-| Métrique | Valeur |
+| Metrique | Valeur |
 |----------|--------|
-| Articles éligibles à la suppression | 6 458 |
-| Plus ancien article | 2025-12-16 |
-| Plus récent article éligible | 2026-01-27 |
+| Articles eligibles (> 48h) | 103 |
+| Epingles (proteges) | 9 |
+| Non lus avec abonnement (proteges) | 4 |
+| Non lus sans abonnement (supprimes) | 0 |
+| Lus non epingles (supprimes) | 90 |
+| **Total supprime** | **~90** |
 
-La prochaine exécution du cron job (3h du matin) supprimera jusqu'à 1000 articles par batch.
+### Details techniques
+
+**Migration SQL** - Mise a jour de `purge_old_articles` et `test_purge_articles` :
+
+La condition de protection passe de :
+```text
+NOT EXISTS (is_pinned = true)
+```
+A :
+```text
+NOT EXISTS (is_pinned = true)
+AND NOT (article non lu ET feed a au moins un abonne)
+```
+
+Concretement, un article est supprime si :
+1. `last_seen_at` depasse 48h
+2. Il n'est epingle par personne
+3. ET il est soit lu par au moins un utilisateur, soit son flux n'a aucun abonne actif
+
+La fonction `test_purge_articles` sera aussi mise a jour pour refleter cette logique.
+
+### Fichiers modifies
+
+- **Migration SQL** : nouvelle fonction `purge_old_articles` et `test_purge_articles`
+- **src/data/changelog.ts** : ajout d'une entree pour documenter le changement
+- **.lovable/plan.md** : mise a jour de la documentation
+
