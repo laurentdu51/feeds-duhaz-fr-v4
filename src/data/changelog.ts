@@ -9,6 +9,20 @@ export interface ChangelogEntry {
 
 export const changelogData: ChangelogEntry[] = [
   {
+    version: "1.13.0",
+    date: "2026-02-09",
+    category: "improvement",
+    title: "Protection des articles non lus avec abonnement actif",
+    description: "Les articles non lus appartenant à un flux suivi sont désormais protégés de la purge automatique.",
+    details: [
+      "Les articles épinglés restent toujours protégés",
+      "Les articles non lus dont le flux a au moins un abonné sont protégés",
+      "Les articles non lus sans aucun abonné sont supprimés",
+      "Les articles lus non épinglés sont supprimés après 48h",
+      "Mise à jour des fonctions purge_old_articles et test_purge_articles"
+    ]
+  },
+  {
     version: "1.12.0",
     date: "2026-01-29",
     category: "improvement",
