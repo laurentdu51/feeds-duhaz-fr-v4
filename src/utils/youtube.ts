@@ -96,11 +96,19 @@ Méthode alternative :
 // Function to automatically fetch YouTube channel RSS and name
 export const fetchYouTubeRSSUrl = async (url: string): Promise<{rssUrl: string, channelName: string} | null> => {
   try {
+    const { supabase } = await import('@/integrations/supabase/client');
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session?.access_token) {
+      console.error('No active session for fetch-youtube-rss');
+      return null;
+    }
+
     const response = await fetch(`https://wftyukugedtojizgatwj.supabase.co/functions/v1/fetch-youtube-rss`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndmdHl1a3VnZWR0b2ppemdhdHdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkzNjIxNTEsImV4cCI6MjA2NDkzODE1MX0.KflrS6WiGksws1nO8NDm5i_Dav4u2JDSuEYtEnmKCRE`
+        'Authorization': `Bearer ${session.access_token}`
       },
       body: JSON.stringify({ url })
     });
