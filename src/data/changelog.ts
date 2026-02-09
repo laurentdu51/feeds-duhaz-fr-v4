@@ -9,6 +9,17 @@ export interface ChangelogEntry {
 
 export const changelogData: ChangelogEntry[] = [
   {
+    version: "1.13.1",
+    date: "2026-02-09",
+    category: "bugfix",
+    title: "Correction de l'authentification pour la détection YouTube",
+    description: "La détection automatique du flux RSS YouTube utilise désormais le token de session de l'utilisateur connecté.",
+    details: [
+      "Correction de l'erreur 401 lors de l'ajout d'un flux YouTube",
+      "Utilisation du JWT utilisateur au lieu de la clé anon pour l'appel à fetch-youtube-rss",
+    ]
+  },
+  {
     version: "1.13.0",
     date: "2026-02-09",
     category: "improvement",
