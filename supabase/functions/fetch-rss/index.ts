@@ -226,21 +226,42 @@ serve(async (req) => {
 
     // Save articles to database
     const now = new Date().toISOString();
-    const articlesToInsert = items.map(item => {
-      // Calculate read time (rough estimate: 200 words per minute)
+
+    // First, get existing article GUIDs for this feed to avoid full rewrites
+    const { data: existingArticles } = await supabaseClient
+      .from('articles')
+      .select('guid')
+      .eq('feed_id', feedId)
+
+    const existingGuids = new Set((existingArticles || []).map((a: { guid: string | null }) => a.guid))
+
+    const newItems = items.filter(item => !existingGuids.has(item.guid))
+    const existingItems = items.filter(item => existingGuids.has(item.guid))
+
+    console.log(`New articles: ${newItems.length}, existing: ${existingItems.length}`)
+
+    // Only update last_seen_at for existing articles (no content rewrite = less I/O)
+    if (existingItems.length > 0) {
+      const { error: updateError } = await supabaseClient
+        .from('articles')
+        .update({ last_seen_at: now })
+        .eq('feed_id', feedId)
+        .in('guid', existingItems.map(i => i.guid).filter(Boolean))
+
+      if (updateError) {
+        console.error('Error updating last_seen_at:', updateError)
+      }
+    }
+
+    // Insert only new articles
+    const articlesToInsert = newItems.map(item => {
       const wordCount = (item.description || '').split(' ').length
       const readTime = Math.max(1, Math.ceil(wordCount / 200))
 
-      // Parse and validate date
       let publishedAt: string;
       try {
-        if (item.pubDate) {
-          publishedAt = new Date(item.pubDate).toISOString();
-        } else {
-          publishedAt = new Date().toISOString();
-        }
-      } catch (error) {
-        console.log(`Invalid date format: ${item.pubDate}, using current date`);
+        publishedAt = item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString();
+      } catch {
         publishedAt = new Date().toISOString();
       }
 
@@ -258,18 +279,18 @@ serve(async (req) => {
       }
     })
 
-    console.log(`Preparing to insert ${articlesToInsert.length} articles`)
+    console.log(`Preparing to insert ${articlesToInsert.length} new articles`)
 
-    // Insert articles - on conflict update last_seen_at
-    const { error: insertError } = await supabaseClient
-      .from('articles')
-      .upsert(articlesToInsert, { 
-        onConflict: 'feed_id,guid'
-      })
+    // Insert only truly new articles
+    if (articlesToInsert.length > 0) {
+      const { error: insertError } = await supabaseClient
+        .from('articles')
+        .insert(articlesToInsert)
 
-    if (insertError) {
-      console.error('Error inserting articles:', insertError)
-      throw insertError
+      if (insertError) {
+        console.error('Error inserting articles:', insertError)
+        throw insertError
+      }
     }
 
     // Get current article count for this feed
@@ -283,7 +304,7 @@ serve(async (req) => {
     }
 
     // Update feed's last_fetched_at and article_count
-    const { error: updateError } = await supabaseClient
+    const { error: feedUpdateError } = await supabaseClient
       .from('feeds')
       .update({ 
         last_fetched_at: new Date().toISOString(),
@@ -292,17 +313,20 @@ serve(async (req) => {
       })
       .eq('id', feedId)
 
-    if (updateError) {
-      console.error('Error updating feed:', updateError)
-      throw updateError
+    if (feedUpdateError) {
+      console.error('Error updating feed:', feedUpdateError)
+      throw feedUpdateError
     }
 
-    console.log(`Successfully processed ${articlesToInsert.length} articles for feed ${feedId}`)
+    const totalProcessed = newItems.length + existingItems.length
+    console.log(`Feed ${feedId}: ${newItems.length} new articles inserted, ${existingItems.length} existing updated`)
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        articlesProcessed: articlesToInsert.length 
+        articlesProcessed: totalProcessed,
+        newArticles: newItems.length,
+        updatedArticles: existingItems.length
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
