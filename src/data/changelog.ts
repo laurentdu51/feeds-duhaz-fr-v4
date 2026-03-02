@@ -9,6 +9,20 @@ export interface ChangelogEntry {
 
 export const changelogData: ChangelogEntry[] = [
   {
+    version: "1.14.0",
+    date: "2026-03-02",
+    category: "improvement",
+    title: "Optimisation du budget Disk IO",
+    description: "Réduction significative des opérations disque pour éviter l'épuisement du budget Disk IO Supabase.",
+    details: [
+      "Cron de récupération RSS réduit de 10 à 30 minutes (3x moins d'appels/jour)",
+      "Ajout d'un index sur articles(last_seen_at) pour accélérer la purge",
+      "fetch-rss optimisé : UPDATE last_seen_at uniquement pour les articles existants",
+      "INSERT uniquement pour les nouveaux articles (élimination des upserts massifs)",
+      "Réduction estimée de ~80% des écritures disque par cycle de fetch"
+    ]
+  },
+  {
     version: "1.13.1",
     date: "2026-02-09",
     category: "bugfix",
