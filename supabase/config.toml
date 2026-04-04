@@ -1,4 +1,4 @@
-project_id = "wftyukugedtojizgatwj"
+project_id = "local"
 
 [functions.purge-articles]
 verify_jwt = false
