@@ -118,25 +118,64 @@ export async function verifySuperUser(req: Request): Promise<boolean> {
 
 /**
  * Validates a cron job secret for internal service-to-service calls
- * Cron jobs should use a shared secret for authentication
- * SECURITY: Fails closed - requires CRON_SECRET to be configured
+ * ASYNC version: checks env var first, then falls back to app_secrets table
+ * SECURITY: Fails closed - requires secret to be configured somewhere
  */
-export function validateCronSecret(req: Request): boolean {
+export async function validateCronSecret(req: Request): Promise<boolean> {
   const cronSecret = req.headers.get('x-cron-secret');
-  const expectedSecret = Deno.env.get('CRON_SECRET');
   
-  // SECURITY: Fail closed - require explicit configuration
-  if (!expectedSecret) {
-    console.error('CRON_SECRET environment variable not configured - denying access');
+  if (!cronSecret) {
     return false;
   }
-  
-  // Constant-time comparison to prevent timing attacks
-  if (cronSecret?.length !== expectedSecret.length) {
+
+  // 1. Try environment variable first (fastest)
+  const envSecret = Deno.env.get('CRON_SECRET');
+  if (envSecret) {
+    if (cronSecret.length !== envSecret.length) {
+      console.log('validateCronSecret: secret length mismatch (env)');
+      return false;
+    }
+    if (cronSecret === envSecret) {
+      return true;
+    }
+    console.log('validateCronSecret: secret value mismatch (env)');
     return false;
   }
-  
-  return cronSecret === expectedSecret;
+
+  // 2. Fallback: read from app_secrets table via service_role
+  console.log('validateCronSecret: CRON_SECRET not in env, trying app_secrets fallback');
+  try {
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
+
+    const { data, error } = await supabase
+      .from('app_secrets')
+      .select('value')
+      .eq('key', 'cron_secret')
+      .single();
+
+    if (error || !data?.value) {
+      console.error('validateCronSecret: cron_secret not found in app_secrets either - denying access');
+      return false;
+    }
+
+    const dbSecret = data.value;
+    if (cronSecret.length !== dbSecret.length) {
+      console.log('validateCronSecret: secret length mismatch (db)');
+      return false;
+    }
+    if (cronSecret === dbSecret) {
+      console.log('validateCronSecret: validated via app_secrets fallback');
+      return true;
+    }
+    console.log('validateCronSecret: secret value mismatch (db)');
+    return false;
+  } catch (err) {
+    console.error('validateCronSecret: error reading app_secrets:', err);
+    return false;
+  }
 }
 
 /**
