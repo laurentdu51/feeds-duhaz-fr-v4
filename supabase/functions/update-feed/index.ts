@@ -1,10 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { isValidExternalUrl, verifySuperUser } from '../_shared/security.ts'
+import { isValidExternalUrl, verifySuperUser, validateCronSecret, isInternalCall } from '../_shared/security.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cron-secret',
 }
 
 serve(async (req) => {
@@ -13,12 +13,15 @@ serve(async (req) => {
   }
 
   try {
-    // Authentication: Only super users can update feeds
+    // Authentication: Allow cron jobs, internal calls, or super users
+    const isCronJob = validateCronSecret(req);
+    const isInternal = isInternalCall(req);
     const isSuperUser = await verifySuperUser(req);
-    if (!isSuperUser) {
+    
+    if (!isCronJob && !isInternal && !isSuperUser) {
       console.log('Unauthorized access attempt to update-feed');
       return new Response(
-        JSON.stringify({ error: 'Unauthorized - Super user access required' }),
+        JSON.stringify({ error: 'Unauthorized - Super user access, cron secret, or service role required' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
