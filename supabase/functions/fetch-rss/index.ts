@@ -73,7 +73,7 @@ serve(async (req) => {
 
   try {
     // Authentication: Allow internal calls (cron jobs) OR authenticated users
-    const isCronJob = validateCronSecret(req);
+    const isCronJob = await validateCronSecret(req);
     const isInternal = isInternalCall(req);
     const auth = await verifyAuth(req);
     

@@ -26,7 +26,7 @@ serve(async (req) => {
 
   try {
     // Authentication: Allow cron jobs, internal calls, or super users
-    const isCronJob = validateCronSecret(req);
+    const isCronJob = await validateCronSecret(req);
     const isInternal = isInternalCall(req);
     const isSuperUser = await verifySuperUser(req);
     
