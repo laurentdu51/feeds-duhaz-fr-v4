@@ -1,28 +1,25 @@
 
-## Diagnostique
 
-### Sources du problème Disk IO
+## Problème
 
-1. **Cron trop fréquent** : `*/10 * * * *` = toutes les 10 min × 49 flux actifs = **~14 000 appels/jour** avec des upserts massifs sur la table `articles`
-2. **Index manquant sur `last_seen_at`** : la purge et les requêtes de filtrage font un full scan sur la table articles (34 MB, 2002 lignes)
-3. **Upsert massif** : chaque fetch-rss fait un upsert de tous les articles du flux, même si rien n'a changé — cela génère des écritures inutiles
+La fonction `update-feed` n'accepte que l'authentification via un JWT utilisateur vérifié comme super-utilisateur. Elle ne supporte pas le `x-cron-secret` ni la détection d'appel interne (service_role key), contrairement à `fetch-rss` et `purge-articles`.
 
-### Plan d'action
+Sur ton instance self-hosted, tu n'as pas de session utilisateur active, donc `verifySuperUser()` échoue systématiquement.
 
-**1. Réduire la fréquence du cron** (impact immédiat, fort)
-- Passer de `*/10 * * * *` à `*/30 * * * *` (toutes les 30 minutes)
-- Les flux RSS ne se mettent généralement pas à jour plus souvent que ça
-- Réduit les I/O de **3x**
+## Solution
 
-**2. Ajouter un index sur `last_seen_at`** (impact sur la purge)
-- Migration SQL : `CREATE INDEX idx_articles_last_seen_at ON public.articles USING btree (last_seen_at);`
-- Rend la purge beaucoup plus rapide (index scan au lieu de seq scan)
+Aligner `update-feed` sur le même modèle d'authentification que `purge-articles` et `fetch-rss` : accepter le cron secret, les appels internes (service_role), **ou** un super-utilisateur authentifié.
 
-**3. Optimiser l'upsert dans fetch-rss** (impact moyen)
-- Mettre à jour `last_seen_at` uniquement si l'article existe déjà
-- Ne pas mettre à jour le contenu si le guid existe déjà (éviter les writes inutiles)
+## Modification
 
-### Fichiers modifiés
+**Fichier : `supabase/functions/update-feed/index.ts`**
 
-- **Migration SQL** : ajout de l'index `last_seen_at` + mise à jour du cron à 30 min
-- **`supabase/functions/fetch-rss/index.ts`** : optimiser l'upsert pour ne pas réécrire les articles existants inutilement
+1. Ajouter les imports `validateCronSecret` et `isInternalCall` depuis `_shared/security.ts`
+2. Ajouter `x-cron-secret` dans les headers CORS autorisés
+3. Remplacer le bloc d'authentification pour accepter 3 méthodes :
+   - `validateCronSecret(req)` — pour les appels cron/curl avec header `x-cron-secret`
+   - `isInternalCall(req)` — pour les appels avec le `service_role` key
+   - `verifySuperUser(req)` — pour les utilisateurs connectés (existant)
+
+La commande curl fonctionnera ensuite avec soit le `x-cron-secret`, soit le `service_role` key en Bearer token.
+
