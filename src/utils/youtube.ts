@@ -104,7 +104,7 @@ export const fetchYouTubeRSSUrl = async (url: string): Promise<{rssUrl: string, 
       return null;
     }
 
-    const response = await fetch(`https://wftyukugedtojizgatwj.supabase.co/functions/v1/fetch-youtube-rss`, {
+    const response = await fetch(`https://data.duhaz.fr/functions/v1/fetch-youtube-rss`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
