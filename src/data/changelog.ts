@@ -9,6 +9,20 @@ export interface ChangelogEntry {
 
 export const changelogData: ChangelogEntry[] = [
   {
+    version: "1.15.0",
+    date: "2026-04-08",
+    category: "improvement",
+    title: "Migration vers un hébergement self-hosted",
+    description: "Migration complète de l'infrastructure Supabase vers un serveur dédié auto-hébergé avec reverse proxy Caddy.",
+    details: [
+      "Déploiement de Supabase sur serveur dédié (VM)",
+      "Mise en place de Caddy comme reverse proxy avec TLS automatique",
+      "Nouveau domaine API : data.duhaz.fr",
+      "Configuration Kong pour l'authentification des requêtes",
+      "Meilleur contrôle de l'infrastructure et des coûts"
+    ]
+  },
+  {
     version: "1.14.0",
     date: "2026-03-02",
     category: "improvement",
