@@ -1,55 +1,61 @@
+## Contexte et limitation
 
+Tu as choisi : **endpoint JSON séparé**, hébergé **dans le projet Lovable uniquement**. Or le sandbox Lovable n'expose qu'**un seul port** (Vite, 8080) — impossible d'y lancer un second serveur Node/Deno sur un autre port accessible publiquement.
 
-## Diagnostic
+Deux contournements possibles dans le cadre Lovable seul :
 
-Le site reste bloqué sur "Chargement des articles..." car les requêtes vers `https://data.duhaz.fr` (REST API, Auth) reçoivent l'erreur "No API key found in request" de Kong.
+### Option A (recommandée) — Route dédiée `/health` servie en JSON par Vite
 
-Le client Supabase JS envoie automatiquement un header `apikey: <clé>` dans chaque requête. Kong attend ce header. Si Caddy ne le transmet pas correctement, Kong rejette la requête.
+Une route React `/health` qui :
+- effectue un `fetch` vers `https://data.duhaz.fr/rest/v1/` avec le header `apikey`
+- mesure la latence
+- retourne un rendu JSON brut (via `<pre>` + `Content-Type` simulé) ou un petit dashboard visuel
+- accessible sur le **même port** que l'app : `https://feeds.duhaz.fr/health`
 
-## Cause probable
+Avantage : 100% dans Lovable, déployable immédiatement, monitorable par UptimeRobot (qui sait parser du HTML/regex).
 
-Caddy transmet normalement tous les headers par défaut. Les causes possibles :
-1. **Le Caddyfile n'est pas un simple `reverse_proxy`** — il y a peut-être un `header_up` qui filtre ou un `handle` mal configuré
-2. **Caddy fait du TLS termination** mais Kong attend aussi du HTTPS en interne, causant un conflit
-3. **Le path ne couvre pas toute l'API** — seuls `/functions/` est proxié, pas `/rest/`, `/auth/`, etc.
+### Option B — "Autre port" simulé via sous-chemin
 
-## Plan
+Vite ne peut pas écouter sur 2 ports, mais on peut réserver un préfixe `/_health/*` distinct du reste de l'app (sans header, sans layout) pour bien isoler le endpoint monitoring du reste de l'UI.
 
-### Etape 1 — Vérifier et corriger le Caddyfile
+---
 
-Ta configuration Caddy devrait ressembler à ceci pour proxier **tout** le trafic vers Kong :
+## Plan proposé (Option A)
 
-```text
-data.duhaz.fr {
-    reverse_proxy localhost:8000
-}
+### 1. Nouvelle page `src/pages/Health.tsx`
+- Effectue au montage un `fetch('https://data.duhaz.fr/rest/v1/', { headers: { apikey: ANON_KEY } })`
+- Mesure le temps de réponse (`performance.now()`)
+- État local : `{ status: 'ok'|'degraded'|'down', latencyMs, httpCode, checkedAt }`
+- Affichage : un bloc `<pre>` contenant le JSON formaté, fond neutre, sans Header/Footer
+- Refresh auto toutes les 30s
+- Code HTTP visuel : badge vert (200/401 = service répond) / rouge (timeout, 5xx)
+
+### 2. Route ajoutée dans `src/App.tsx`
 ```
-
-C'est tout. Pas de filtrage de headers, pas de restriction de path. Caddy gère le TLS côté externe et parle en HTTP vers Kong sur le port 8000.
-
-Si tu as quelque chose de plus complexe (des `handle /functions/*` séparés, des `header_up -apikey`, etc.), c'est probablement la source du problème.
-
-### Etape 2 — Tester la connectivité manuellement
-
-Depuis ta VM, teste que Kong reçoit bien le header `apikey` :
-
-```bash
-curl -v https://data.duhaz.fr/rest/v1/ \
-  -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndmdHl1a3VnZWR0b2ppemdhdHdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkzNjIxNTEsImV4cCI6MjA2NDkzODE1MX0.KflrS6WiGksws1nO8NDm5i_Dav4u2JDSuEYtEnmKCRE"
+<Route path="/health" element={<Health />} />
 ```
+Placée avant le catch-all `*`.
 
-Si ça échoue via `data.duhaz.fr` mais fonctionne en direct sur `localhost:8000`, le problème est confirmé côté Caddy.
+### 3. Aucune modification backend
+Pas de nouvelle edge function, pas de changement Supabase.
 
-### Etape 3 — Alternative si le proxy reste problématique
+### 4. Détails techniques
+- Réutilise la constante `SUPABASE_PUBLISHABLE_KEY` exportée depuis `src/integrations/supabase/client.ts` (à exporter si pas déjà fait)
+- Timeout de 5s via `AbortController`
+- Format JSON de sortie :
+  ```json
+  {
+    "status": "ok",
+    "checks": {
+      "supabase_rest": { "ok": true, "httpCode": 200, "latencyMs": 87 }
+    },
+    "checkedAt": "2026-05-08T..."
+  }
+  ```
+- Pas d'auth requise pour accéder à la page
 
-Si corriger le proxy prend du temps, on peut adopter une approche hybride dans le code :
-- Garder `SUPABASE_URL` pointant vers le cloud (`https://wftyukugedtojizgatwj.supabase.co`) pour les requêtes REST/Auth
-- Utiliser `https://data.duhaz.fr` uniquement pour les appels Edge Functions (via `fetch` direct)
+---
 
-Cela éviterait le problème de proxy pour l'API REST tout en utilisant ta VM pour les fonctions.
+## Si tu veux vraiment un vrai second port
 
-### Ce qu'il faut faire maintenant
-
-1. **Partage ton Caddyfile** (ou la partie concernant `data.duhaz.fr`) pour que je puisse identifier le problème exact
-2. Ou **teste la commande curl** ci-dessus pour confirmer si le header `apikey` passe correctement
-
+Il faudra héberger un mini service ailleurs (ta VM avec Caddy, ou une edge function `health` sur data.duhaz.fr). Dis-le moi et je revois le plan.

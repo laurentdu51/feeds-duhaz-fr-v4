@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Gone from "./pages/Gone";
 import Changelog from "./pages/Changelog";
+import Health from "./pages/Health";
 import PolitiqueCookies from "./pages/PolitiqueCookies";
 import LegacyRedirect from "./components/LegacyRedirect";
 import { CookieBanner } from "./components/CookieBanner";
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/feed/:feedId" element={<FeedDetail />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/changelog" element={<Changelog />} />
+          <Route path="/health" element={<Health />} />
           <Route path="/politique-cookies" element={<PolitiqueCookies />} />
           <Route path="/gone" element={<Gone />} />
           
