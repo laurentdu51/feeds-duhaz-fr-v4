@@ -9,6 +9,11 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
     allowedHosts: ['rpidob','feeds.duhaz.fr'],
+    hmr: {
+      host: 'feeds.duhaz.fr',
+      protocol: 'wss',
+      clientPort: 443,
+    },
   },
   plugins: [
     react(),
