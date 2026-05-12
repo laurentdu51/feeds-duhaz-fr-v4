@@ -293,7 +293,7 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
     }
   }, [user, dateFilter, showFollowedOnly, showReadArticles, showDiscoveryMode]);
 
-  const togglePin = async (articleId: string) => {
+  const togglePin = useCallback(async (articleId: string) => {
     if (!user) {
       toast.error('Vous devez être connecté pour épingler un article');
       return;
