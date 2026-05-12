@@ -388,7 +388,7 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
       if (isDev) console.error('Error deleting article:', error);
       toast.error('Erreur lors de la suppression');
     }
-  };
+  }, [user]);
 
   const fetchRSSContent = async (feedId: string, feedUrl: string) => {
     try {
