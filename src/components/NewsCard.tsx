@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { NewsItem } from '@/types/news';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -240,4 +241,12 @@ const NewsCard = ({
   );
 };
 
-export default NewsCard;
+export default memo(NewsCard, (prev, next) => (
+  prev.news === next.news &&
+  prev.onTogglePin === next.onTogglePin &&
+  prev.onMarkAsRead === next.onMarkAsRead &&
+  prev.onDelete === next.onDelete &&
+  prev.onOpenArticle === next.onOpenArticle &&
+  prev.onSourceClick === next.onSourceClick &&
+  prev.isDiscoveryMode === next.isDiscoveryMode
+));

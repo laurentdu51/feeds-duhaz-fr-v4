@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { NewsItem } from '@/types/news';
@@ -11,7 +11,7 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
-  const fetchArticles = async () => {
+  const fetchArticles = useCallback(async () => {
     try {
       setLoading(true);
       if (isDev) console.log('🔄 Fetching articles...', { user: !!user, dateFilter, showFollowedOnly });
@@ -291,9 +291,9 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, dateFilter, showFollowedOnly, showReadArticles, showDiscoveryMode]);
 
-  const togglePin = async (articleId: string) => {
+  const togglePin = useCallback(async (articleId: string) => {
     if (!user) {
       toast.error('Vous devez être connecté pour épingler un article');
       return;
@@ -328,9 +328,9 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
       if (isDev) console.error('Error toggling pin:', error);
       toast.error('Erreur lors de la mise à jour');
     }
-  };
+  }, [user, articles]);
 
-  const markAsRead = async (articleId: string) => {
+  const markAsRead = useCallback(async (articleId: string) => {
     if (!user) return;
 
     try {
@@ -362,9 +362,9 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
     } catch (error) {
       if (isDev) console.error('Error marking as read:', error);
     }
-  };
+  }, [user, articles, showReadArticles]);
 
-  const deleteArticle = async (articleId: string) => {
+  const deleteArticle = useCallback(async (articleId: string) => {
     if (!user) {
       toast.error('Vous devez être connecté pour supprimer un article');
       return;
@@ -388,7 +388,7 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
       if (isDev) console.error('Error deleting article:', error);
       toast.error('Erreur lors de la suppression');
     }
-  };
+  }, [user]);
 
   const fetchRSSContent = async (feedId: string, feedUrl: string) => {
     try {
@@ -416,7 +416,7 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
 
   useEffect(() => {
     fetchArticles();
-  }, [user, dateFilter, showFollowedOnly, showReadArticles]);
+  }, [fetchArticles]);
 
   return {
     articles,

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, Fragment } from 'react';
+import { useState, useMemo, useEffect, useCallback, Fragment } from 'react';
 import { categories } from '@/data/mockNews';
 import { useRealArticles } from '@/hooks/useRealArticles';
 import { useAuth } from '@/hooks/useAuth';
@@ -138,18 +138,18 @@ const Index = () => {
     console.log('Nouveau flux ajouté:', feedData);
     toast.success(`Flux "${feedData.name}" ajouté avec succès!`);
   };
-  const handleOpenArticle = (article: NewsItem) => {
+  const handleOpenArticle = useCallback((article: NewsItem) => {
     setSelectedArticle(article);
     setIsArticleModalOpen(true);
-  };
-  const handleCloseArticleModal = () => {
+  }, []);
+  const handleCloseArticleModal = useCallback(() => {
     setIsArticleModalOpen(false);
     setSelectedArticle(null);
-  };
+  }, []);
 
-  const handleSourceClick = (feedId: string, feedName: string) => {
+  const handleSourceClick = useCallback((feedId: string, feedName: string) => {
     navigate(`/feed/${feedId}`);
-  };
+  }, [navigate]);
   if (loading) {
     return <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex items-center gap-2">
