@@ -416,7 +416,7 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
 
   useEffect(() => {
     fetchArticles();
-  }, [user, dateFilter, showFollowedOnly, showReadArticles]);
+  }, [fetchArticles]);
 
   return {
     articles,
