@@ -1,61 +1,48 @@
-## Contexte et limitation
+## Pourquoi le preview se recharge en boucle
 
-Tu as choisi : **endpoint JSON séparé**, hébergé **dans le projet Lovable uniquement**. Or le sandbox Lovable n'expose qu'**un seul port** (Vite, 8080) — impossible d'y lancer un second serveur Node/Deno sur un autre port accessible publiquement.
+Les logs du dev server montrent une **erreur de compilation Vite/SWC** dans `src/pages/Index.tsx` :
 
-Deux contournements possibles dans le cadre Lovable seul :
-
-### Option A (recommandée) — Route dédiée `/health` servie en JSON par Vite
-
-Une route React `/health` qui :
-- effectue un `fetch` vers `https://data.duhaz.fr/rest/v1/` avec le header `apikey`
-- mesure la latence
-- retourne un rendu JSON brut (via `<pre>` + `Content-Type` simulé) ou un petit dashboard visuel
-- accessible sur le **même port** que l'app : `https://feeds.duhaz.fr/health`
-
-Avantage : 100% dans Lovable, déployable immédiatement, monitorable par UptimeRobot (qui sait parser du HTML/regex).
-
-### Option B — "Autre port" simulé via sous-chemin
-
-Vite ne peut pas écouter sur 2 ports, mais on peut réserver un préfixe `/_health/*` distinct du reste de l'app (sans header, sans layout) pour bien isoler le endpoint monitoring du reste de l'UI.
-
----
-
-## Plan proposé (Option A)
-
-### 1. Nouvelle page `src/pages/Health.tsx`
-- Effectue au montage un `fetch('https://data.duhaz.fr/rest/v1/', { headers: { apikey: ANON_KEY } })`
-- Mesure le temps de réponse (`performance.now()`)
-- État local : `{ status: 'ok'|'degraded'|'down', latencyMs, httpCode, checkedAt }`
-- Affichage : un bloc `<pre>` contenant le JSON formaté, fond neutre, sans Header/Footer
-- Refresh auto toutes les 30s
-- Code HTTP visuel : badge vert (200/401 = service répond) / rouge (timeout, 5xx)
-
-### 2. Route ajoutée dans `src/App.tsx`
 ```
-<Route path="/health" element={<Health />} />
+Adjacent JSX elements must be wrapped in an enclosing tag.
+Did you want a JSX fragment <>...</>?  (348:6)
 ```
-Placée avant le catch-all `*`.
 
-### 3. Aucune modification backend
-Pas de nouvelle edge function, pas de changement Supabase.
+Tant que le fichier ne compile pas, le HMR échoue, le bundle est invalide, et le preview retombe en permanence sur l'écran « Chargement des articles… » (visible dans le replay : `Initializing application` toutes les 2-5 s).
 
-### 4. Détails techniques
-- Réutilise la constante `SUPABASE_PUBLISHABLE_KEY` exportée depuis `src/integrations/supabase/client.ts` (à exporter si pas déjà fait)
-- Timeout de 5s via `AbortController`
-- Format JSON de sortie :
-  ```json
-  {
-    "status": "ok",
-    "checks": {
-      "supabase_rest": { "ok": true, "httpCode": 200, "latencyMs": 87 }
-    },
-    "checkedAt": "2026-05-08T..."
-  }
-  ```
-- Pas d'auth requise pour accéder à la page
+## Cause
 
----
+Dans le bloc pagination (lignes 309-328), le `.map()` retourne un fragment court `<>...</>`. SWC (via `lovable-tagger` en dev) n'arrive pas à parser ce fragment retourné directement depuis une arrow function entre parenthèses, et signale les éléments JSX comme « adjacents non encapsulés ».
 
-## Si tu veux vraiment un vrai second port
+De plus, un fragment `<>` ne peut pas porter de `key`, ce qui provoquerait de toute façon un warning React dans la liste.
 
-Il faudra héberger un mini service ailleurs (ta VM avec Caddy, ou une edge function `health` sur data.duhaz.fr). Dis-le moi et je revois le plan.
+## Correction prévue
+
+Remplacer le fragment court par `React.Fragment` avec une `key`, dans `src/pages/Index.tsx` lignes 311-328 :
+
+```tsx
+.map((page, index, array) => (
+  <React.Fragment key={page}>
+    {index > 0 && array[index - 1] !== page - 1 && (
+      <PaginationItem>
+        <PaginationEllipsis />
+      </PaginationItem>
+    )}
+    <PaginationItem>
+      <PaginationLink
+        onClick={() => setCurrentPage(page)}
+        isActive={currentPage === page}
+        className="cursor-pointer"
+      >
+        {page}
+      </PaginationLink>
+    </PaginationItem>
+  </React.Fragment>
+))
+```
+
+Et ajouter `import React from 'react'` en haut du fichier (ou utiliser `Fragment` importé nommément).
+
+## Vérification
+
+- Vérifier dans les logs `vite` qu'il n'y a plus d'erreur de parse.
+- Charger `/` et confirmer que la page reste affichée sans reload en boucle.

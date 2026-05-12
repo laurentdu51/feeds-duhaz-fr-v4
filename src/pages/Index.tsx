@@ -309,13 +309,13 @@ const Index = () => {
                       {Array.from({ length: totalPages }, (_, i) => i + 1)
                         .filter(page => page === 1 || page === totalPages || Math.abs(page - currentPage) <= 1)
                         .map((page, index, array) => (
-                          <>
+                          <Fragment key={page}>
                             {index > 0 && array[index - 1] !== page - 1 && (
-                              <PaginationItem key={`ellipsis-${page}`}>
+                              <PaginationItem>
                                 <PaginationEllipsis />
                               </PaginationItem>
                             )}
-                            <PaginationItem key={page}>
+                            <PaginationItem>
                               <PaginationLink
                                 onClick={() => setCurrentPage(page)}
                                 isActive={currentPage === page}
@@ -324,7 +324,7 @@ const Index = () => {
                                 {page}
                               </PaginationLink>
                             </PaginationItem>
-                          </>
+                          </Fragment>
                         ))}
                       
                       <PaginationItem>
