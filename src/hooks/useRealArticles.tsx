@@ -11,7 +11,7 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
-  const fetchArticles = async () => {
+  const fetchArticles = useCallback(async () => {
     try {
       setLoading(true);
       if (isDev) console.log('🔄 Fetching articles...', { user: !!user, dateFilter, showFollowedOnly });
