@@ -362,9 +362,9 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
     } catch (error) {
       if (isDev) console.error('Error marking as read:', error);
     }
-  };
+  }, [user, articles, showReadArticles]);
 
-  const deleteArticle = async (articleId: string) => {
+  const deleteArticle = useCallback(async (articleId: string) => {
     if (!user) {
       toast.error('Vous devez être connecté pour supprimer un article');
       return;
