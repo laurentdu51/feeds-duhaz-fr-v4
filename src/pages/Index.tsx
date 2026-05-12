@@ -230,7 +230,7 @@ const Index = () => {
                 onMarkAsRead={markAsRead}
                 onDeleteArticle={deleteArticle}
                 onOpenArticle={handleOpenArticle}
-            </div>
+              />
           )}
           
           {/* Main content */}
