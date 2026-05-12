@@ -328,9 +328,9 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
       if (isDev) console.error('Error toggling pin:', error);
       toast.error('Erreur lors de la mise à jour');
     }
-  };
+  }, [user, articles]);
 
-  const markAsRead = async (articleId: string) => {
+  const markAsRead = useCallback(async (articleId: string) => {
     if (!user) return;
 
     try {
