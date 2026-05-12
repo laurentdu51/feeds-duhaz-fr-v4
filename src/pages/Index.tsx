@@ -231,6 +231,7 @@ const Index = () => {
                 onDeleteArticle={deleteArticle}
                 onOpenArticle={handleOpenArticle}
               />
+            </div>
           )}
           
           {/* Main content */}
