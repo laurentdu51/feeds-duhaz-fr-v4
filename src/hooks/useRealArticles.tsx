@@ -291,7 +291,7 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, dateFilter, showFollowedOnly, showReadArticles, showDiscoveryMode]);
 
   const togglePin = async (articleId: string) => {
     if (!user) {
