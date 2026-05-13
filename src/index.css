@@ -68,7 +68,7 @@
 
     /* Couleur primaire - bleu vif pour une bonne visibilité */
     --primary: 217 91% 60%;
-    --primary-foreground: 222 47% 11%;
+    --primary-foreground: 0 0% 100%;
 
     /* Secondaire - plus visible en mode sombre */
     --secondary: 217 33% 22%;

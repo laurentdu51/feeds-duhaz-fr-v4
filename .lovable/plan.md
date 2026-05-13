@@ -1,48 +1,34 @@
-## Pourquoi le preview se recharge en boucle
+## Problème
 
-Les logs du dev server montrent une **erreur de compilation Vite/SWC** dans `src/pages/Index.tsx` :
+Sur la capture, le bouton actif « Tous les flux » apparaît en bleu vif avec un texte **bleu-noir foncé** très peu lisible.
+
+C'est dû au token `--primary-foreground` en mode sombre dans `src/index.css` :
 
 ```
-Adjacent JSX elements must be wrapped in an enclosing tag.
-Did you want a JSX fragment <>...</>?  (348:6)
+--primary: 217 91% 60%;            /* bleu vif */
+--primary-foreground: 222 47% 11%; /* bleu-noir foncé */
 ```
 
-Tant que le fichier ne compile pas, le HMR échoue, le bundle est invalide, et le preview retombe en permanence sur l'écran « Chargement des articles… » (visible dans le replay : `Initializing application` toutes les 2-5 s).
+Tous les boutons en variant `default` (boutons actifs des filtres « Affichage », « Période », « Articles lus », pagination, badges primaires…) héritent de ce contraste faible.
 
-## Cause
+## Correctif
 
-Dans le bloc pagination (lignes 309-328), le `.map()` retourne un fragment court `<>...</>`. SWC (via `lovable-tagger` en dev) n'arrive pas à parser ce fragment retourné directement depuis une arrow function entre parenthèses, et signale les éléments JSX comme « adjacents non encapsulés ».
+Dans `src/index.css`, bloc `.dark`, remplacer :
 
-De plus, un fragment `<>` ne peut pas porter de `key`, ce qui provoquerait de toute façon un warning React dans la liste.
-
-## Correction prévue
-
-Remplacer le fragment court par `React.Fragment` avec une `key`, dans `src/pages/Index.tsx` lignes 311-328 :
-
-```tsx
-.map((page, index, array) => (
-  <React.Fragment key={page}>
-    {index > 0 && array[index - 1] !== page - 1 && (
-      <PaginationItem>
-        <PaginationEllipsis />
-      </PaginationItem>
-    )}
-    <PaginationItem>
-      <PaginationLink
-        onClick={() => setCurrentPage(page)}
-        isActive={currentPage === page}
-        className="cursor-pointer"
-      >
-        {page}
-      </PaginationLink>
-    </PaginationItem>
-  </React.Fragment>
-))
+```
+--primary-foreground: 222 47% 11%;
 ```
 
-Et ajouter `import React from 'react'` en haut du fichier (ou utiliser `Fragment` importé nommément).
+par :
+
+```
+--primary-foreground: 0 0% 100%;
+```
+
+Texte blanc pur sur le bleu `217 91% 60%` → contraste WCAG AA OK, et identique à ce qui est déjà fait pour `--sidebar-primary-foreground`.
 
 ## Vérification
 
-- Vérifier dans les logs `vite` qu'il n'y a plus d'erreur de parse.
-- Charger `/` et confirmer que la page reste affichée sans reload en boucle.
+- Recharger `/` en mode sombre
+- Vérifier que « Mes flux », « Tous les flux », « Aujourd'hui », « Afficher les lus », pagination active, etc. affichent un libellé blanc lisible
+- Vérifier le mode clair : inchangé (`--primary-foreground` reste `210 40% 98%`)
