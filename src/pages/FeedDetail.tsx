@@ -15,6 +15,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
+import { SEO } from '@/components/SEO';
 
 const FeedDetail = () => {
   const { feedId } = useParams<{ feedId: string }>();
@@ -139,6 +140,11 @@ const FeedDetail = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title={`${feedInfo.name} - Feeds.Duhaz.fr`}
+        description={feedInfo.description || `Tous les articles du flux ${feedInfo.name} agrégés sur Feeds.Duhaz.fr.`}
+        canonical={`https://feeds.duhaz.fr/feed/${feedId}`}
+      />
       <div className="container mx-auto px-4 py-8">
         {/* Header with back button and feed info */}
         <div className="mb-8 space-y-4">

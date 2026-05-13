@@ -1,0 +1,17 @@
+# Feeds.Duhaz.fr
+
+> Agrégateur de flux RSS personnalisé : centralisez vos flux RSS, chaînes YouTube et sources d'actualité dans une seule interface.
+
+Feeds.Duhaz.fr permet aux utilisateurs connectés de suivre des flux RSS, de marquer des articles comme favoris (épinglés) et de découvrir de nouveaux flux. Les visiteurs non connectés peuvent consulter les articles publics.
+
+## Pages
+
+- [Accueil](/): Flux d'articles agrégés depuis vos sources suivies.
+- [Flux disponibles](/feeds): Découverte et gestion des flux RSS, YouTube et actualités.
+- [Articles épinglés](/pinned): Vos articles favoris sauvegardés.
+- [Changelog](/changelog): Historique des nouveautés et améliorations.
+- [Politique cookies](/politique-cookies): Information sur l'usage des cookies essentiels.
+
+## Optional
+
+- [Connexion](/auth): Authentification utilisateur.

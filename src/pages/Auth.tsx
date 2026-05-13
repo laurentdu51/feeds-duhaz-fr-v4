@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Rss, Mail, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { Navigate } from 'react-router-dom';
+import { SEO } from '@/components/SEO';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -52,6 +53,11 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <SEO
+        title="Connexion - Feeds.Duhaz.fr"
+        description="Connectez-vous ou créez un compte pour gérer vos flux RSS, YouTube et marquer vos articles favoris."
+        canonical="https://feeds.duhaz.fr/auth"
+      />
       <div className="w-full max-w-md">
         <div className="flex items-center justify-center gap-2 mb-8">
           <Rss className="h-8 w-8 text-primary" />

@@ -38,6 +38,7 @@ import {
 import { Link } from 'react-router-dom';
 import AddFeedModal from '@/components/AddFeedModal';
 import { supabase } from '@/integrations/supabase/client';
+import { SEO } from '@/components/SEO';
 import { toast } from 'sonner';
 import EditFeedModal from '@/components/EditFeedModal';
 
@@ -312,6 +313,11 @@ const FeedsManagement = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Flux disponibles - Gérez vos sources RSS"
+        description="Découvrez, ajoutez et gérez vos flux RSS, chaînes YouTube et sources d'actualité préférées en un seul endroit."
+        canonical="https://feeds.duhaz.fr/feeds"
+      />
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
