@@ -105,7 +105,8 @@ const CategoryFilter = ({
       <div className="space-y-2">
         <Button
           variant={selectedCategory === null ? "default" : "outline"}
-          className="w-full justify-start gap-2"
+          size="sm"
+          className="w-full justify-start gap-2 h-9"
           onClick={() => onCategoryChange(null)}
         >
           <span>Toutes</span>
@@ -123,7 +124,8 @@ const CategoryFilter = ({
             <Button
               key={category.id}
               variant={isSelected ? "default" : "outline"}
-              className="w-full justify-start gap-2"
+              size="sm"
+              className="w-full justify-start gap-2 h-9"
               onClick={() => onCategoryChange(category.id)}
             >
               <IconComponent className="h-4 w-4" />
