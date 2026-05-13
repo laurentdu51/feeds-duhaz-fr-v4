@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { SEO } from '@/components/SEO';
 
 const SUPABASE_URL = "https://data.duhaz.fr";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzc1MjA3MzMzLCJleHAiOjE5MzI4ODczMzN9.H3MmzeioXx3Op6gOjA9JvGe2hIyUwkqY-vbyy5kD2Es";
@@ -79,6 +80,11 @@ const Health = () => {
       maxWidth: 720,
       margin: '0 auto',
     }}>
+      <SEO
+        title="Health Status - Feeds.Duhaz.fr"
+        description="Page de statut technique : disponibilité et latence des services backend de Feeds.Duhaz.fr."
+        canonical="https://feeds.duhaz.fr/health"
+      />
       <h1 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>
         <span
           aria-hidden

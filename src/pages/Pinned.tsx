@@ -7,6 +7,7 @@ import NewsCard from "@/components/NewsCard";
 import ArticleModal from "@/components/ArticleModal";
 import { NewsItem } from "@/types/news";
 import { Button } from "@/components/ui/button";
+import { SEO } from "@/components/SEO";
 
 const Pinned = () => {
   const navigate = useNavigate();
@@ -33,6 +34,11 @@ const Pinned = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Articles épinglés - Feeds.Duhaz.fr"
+        description="Retrouvez tous vos articles favoris épinglés au même endroit pour les consulter ou les partager plus tard."
+        canonical="https://feeds.duhaz.fr/pinned"
+      />
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between px-4">
