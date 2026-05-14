@@ -26,6 +26,14 @@ const Index = () => {
   const [showFollowedOnly, setShowFollowedOnly] = useState(!!user);
   const [showDiscoveryMode, setShowDiscoveryMode] = useState(false);
   const [showReadArticles, setShowReadArticles] = useState(false);
+  const [userInteracted, setUserInteracted] = useState(false);
+
+  // Sync default view mode with auth state until the user picks a mode manually
+  useEffect(() => {
+    if (userInteracted) return;
+    setShowFollowedOnly(!!user);
+    setShowDiscoveryMode(false);
+  }, [user, userInteracted]);
 
   // Handle view mode changes (followed, discovery, all)
   const handleViewModeChange = (mode: 'followed' | 'discovery' | 'all') => {
