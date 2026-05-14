@@ -37,6 +37,7 @@ const Index = () => {
 
   // Handle view mode changes (followed, discovery, all)
   const handleViewModeChange = (mode: 'followed' | 'discovery' | 'all') => {
+    setUserInteracted(true);
     switch (mode) {
       case 'followed':
         setShowFollowedOnly(true);
