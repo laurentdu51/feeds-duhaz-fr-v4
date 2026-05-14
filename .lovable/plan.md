@@ -1,34 +1,17 @@
 ## Problème
+L'affichage par défaut des articles pour un utilisateur connecté est censé être "Mes flux" (`showFollowedOnly = true`), mais le `useState(!!user)` est initialisé avant que la session ne soit récupérée, ce qui bloque la valeur sur `false`.
 
-Sur la capture, le bouton actif « Tous les flux » apparaît en bleu vif avec un texte **bleu-noir foncé** très peu lisible.
+## Solution
+Corriger l'initialisation du mode d'affichage dans `src/pages/Index.tsx` pour que :
+1. Lors du chargement initial, si l'utilisateur est connecté, `showFollowedOnly` passe automatiquement à `true`
+2. Lors de la déconnexion, il repasse à `false` (mode visiteur)
+3. L'utilisateur peut toujours basculer manuellement via les boutons de la sidebar
 
-C'est dû au token `--primary-foreground` en mode sombre dans `src/index.css` :
+## Implémentation technique
+- Dans `Index.tsx` : ajouter un `useEffect` qui observe `user` et ajuste `showFollowedOnly` en conséquence, en évitant les boucles infinies
+- S'assurer que le bouton "Mes flux" dans `CategoryFilter` reflète bien l'état actif par défaut pour un utilisateur connecté
+- Tester que la navigation entre connexion/déconnexion bascule correctement le mode d'affichage
 
-```
---primary: 217 91% 60%;            /* bleu vif */
---primary-foreground: 222 47% 11%; /* bleu-noir foncé */
-```
-
-Tous les boutons en variant `default` (boutons actifs des filtres « Affichage », « Période », « Articles lus », pagination, badges primaires…) héritent de ce contraste faible.
-
-## Correctif
-
-Dans `src/index.css`, bloc `.dark`, remplacer :
-
-```
---primary-foreground: 222 47% 11%;
-```
-
-par :
-
-```
---primary-foreground: 0 0% 100%;
-```
-
-Texte blanc pur sur le bleu `217 91% 60%` → contraste WCAG AA OK, et identique à ce qui est déjà fait pour `--sidebar-primary-foreground`.
-
-## Vérification
-
-- Recharger `/` en mode sombre
-- Vérifier que « Mes flux », « Tous les flux », « Aujourd'hui », « Afficher les lus », pagination active, etc. affichent un libellé blanc lisible
-- Vérifier le mode clair : inchangé (`--primary-foreground` reste `210 40% 98%`)
+## Fichiers concernés
+- `src/pages/Index.tsx` — logique d'état `showFollowedOnly`
+- `src/components/CategoryFilter.tsx` — boutons d'affichage (vérification visuelle uniquement)
