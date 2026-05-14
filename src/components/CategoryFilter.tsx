@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { NewsCategory, NewsItem } from '@/types/news';
 import { Button } from '@/components/ui/button';
@@ -15,14 +15,11 @@ import {
   Clock,
   Heart,
   Eye,
-  ChevronDown,
-  ChevronRight,
   BookOpen,
   Trash2,
   ArrowRight
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -84,7 +81,6 @@ const CategoryFilter = ({
   onOpenArticle
 }: CategoryFilterProps) => {
   const { user } = useAuth();
-  const [isPinnedExpanded, setIsPinnedExpanded] = useState(true);
 
   // Memoize category counts to avoid recalculation on every render
   const categoryCounts = useMemo(() => {
@@ -250,136 +246,123 @@ const CategoryFilter = ({
 
             {/* Section 3: Articles épinglés */}
             {user && (
-              <div className="col-span-full">
-                <Collapsible open={isPinnedExpanded} onOpenChange={setIsPinnedExpanded}>
-                  <CollapsibleTrigger asChild>
-                    <Button variant="outline" className="w-full justify-between p-3">
-                      <div className="flex items-center gap-2">
-                        <Pin className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm font-medium">Articles épinglés</span>
-                        <Badge variant="secondary">{pinnedCount}</Badge>
-                      </div>
-                      {isPinnedExpanded ? (
-                        <ChevronDown className="h-4 w-4" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="space-y-2 mt-2">
-                    {pinnedArticles.length === 0 ? (
-                      <div className="text-center py-4 text-muted-foreground text-sm">
-                        Aucun article épinglé
-                      </div>
-                    ) : (
-                      <div className="space-y-2 overflow-hidden">
-                        {pinnedArticles.slice(0, 3).map((article) => (
-                          <div
-                            key={article.id}
-                            className="border rounded-lg p-3 bg-card hover:bg-muted/50 transition-colors overflow-hidden"
+              <div className="col-span-full space-y-2">
+                <div className="flex items-center gap-2 mb-1">
+                  <Pin className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-muted-foreground">Articles épinglés</span>
+                  <Badge variant="secondary">{pinnedCount}</Badge>
+                </div>
+                {pinnedArticles.length === 0 ? (
+                  <div className="text-center py-4 text-muted-foreground text-sm border rounded-lg bg-card">
+                    Aucun article épinglé
+                  </div>
+                ) : (
+                  <div className="space-y-2 overflow-hidden">
+                    {pinnedArticles.slice(0, 3).map((article) => (
+                      <div
+                        key={article.id}
+                        className="border rounded-lg p-3 bg-card hover:bg-muted/50 transition-colors overflow-hidden"
+                      >
+                        <div className="flex items-start gap-2">
+                          <div 
+                            className="flex-1 min-w-0 cursor-pointer"
+                            onClick={() => onOpenArticle?.(article)}
                           >
-                            <div className="flex items-start gap-2">
-                              <div 
-                                className="flex-1 min-w-0 cursor-pointer"
-                                onClick={() => onOpenArticle?.(article)}
-                              >
-                                <h4 className="text-sm font-medium line-clamp-2 mb-1 hover:text-primary transition-colors">
-                                  {article.title}
-                                </h4>
-                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                  <span>{article.source}</span>
-                                  <span>•</span>
-                                  <span>{new Date(article.publishedAt).toLocaleDateString('fr-FR')}</span>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                {!article.isRead && onMarkAsRead && (
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-7 w-7 p-0"
-                                        title="Marquer comme lu"
-                                      >
-                                        <BookOpen className="h-3 w-3" />
-                                      </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                      <AlertDialogHeader>
-                                        <AlertDialogTitle>Marquer comme lu</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                          Êtes-vous sûr de vouloir marquer cet article comme lu ?
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel>Annuler</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => onMarkAsRead(article.id)}>
-                                          Marquer comme lu
-                                        </AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
-                                )}
-                                {onTogglePin && (
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-7 w-7 p-0"
-                                        title="Désépingler"
-                                      >
-                                        <Pin className="h-3 w-3 fill-current" />
-                                      </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                      <AlertDialogHeader>
-                                        <AlertDialogTitle>Désépingler l'article</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                          Êtes-vous sûr de vouloir désépingler cet article ?
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel>Annuler</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => onTogglePin(article.id)}>
-                                          Désépingler
-                                        </AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
-                                )}
-                                {onDeleteArticle && (
+                            <h4 className="text-sm font-medium line-clamp-2 mb-1 hover:text-primary transition-colors">
+                              {article.title}
+                            </h4>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <span>{article.source}</span>
+                              <span>•</span>
+                              <span>{new Date(article.publishedAt).toLocaleDateString('fr-FR')}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            {!article.isRead && onMarkAsRead && (
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-                                    onClick={() => onDeleteArticle(article.id)}
-                                    title="Supprimer"
+                                    className="h-7 w-7 p-0"
+                                    title="Marquer comme lu"
                                   >
-                                    <Trash2 className="h-3 w-3" />
+                                    <BookOpen className="h-3 w-3" />
                                   </Button>
-                                )}
-                              </div>
-                            </div>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Marquer comme lu</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Êtes-vous sûr de vouloir marquer cet article comme lu ?
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => onMarkAsRead(article.id)}>
+                                      Marquer comme lu
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            )}
+                            {onTogglePin && (
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 w-7 p-0"
+                                    title="Désépingler"
+                                  >
+                                    <Pin className="h-3 w-3 fill-current" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Désépingler l'article</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Êtes-vous sûr de vouloir désépingler cet article ?
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => onTogglePin(article.id)}>
+                                      Désépingler
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            )}
+                            {onDeleteArticle && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                                onClick={() => onDeleteArticle(article.id)}
+                                title="Supprimer"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            )}
                           </div>
-                        ))}
-                        {pinnedArticles.length > 3 && (
-                          <Link to="/pinned">
-                            <Button 
-                              variant="outline" 
-                              className="w-full gap-2 mt-2"
-                              size="sm"
-                            >
-                              Voir tous les articles épinglés ({pinnedArticles.length})
-                              <ArrowRight className="h-3 w-3" />
-                            </Button>
-                          </Link>
-                        )}
+                        </div>
                       </div>
+                    ))}
+                    {pinnedArticles.length > 3 && (
+                      <Link to="/pinned">
+                        <Button 
+                          variant="outline" 
+                          className="w-full gap-2 mt-2"
+                          size="sm"
+                        >
+                          Voir tous les articles épinglés ({pinnedArticles.length})
+                          <ArrowRight className="h-3 w-3" />
+                        </Button>
+                      </Link>
                     )}
-                  </CollapsibleContent>
-                </Collapsible>
+                  </div>
+                )}
               </div>
             )}
             
