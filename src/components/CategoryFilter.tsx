@@ -246,7 +246,7 @@ const CategoryFilter = ({
 
             {/* Section 3: Articles épinglés */}
             {user && (
-              <div className="col-span-full space-y-2">
+              <div className="w-full space-y-2">
                 <div className="flex items-center gap-2 mb-1">
                   <Pin className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm font-medium text-muted-foreground">Articles épinglés</span>
