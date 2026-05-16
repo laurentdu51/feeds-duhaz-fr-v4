@@ -354,10 +354,6 @@ const CategoryFilter = ({
                     )}
                   </div>
                 )}
-              </div>
-            )}
-            
-          </div>
         </div>
       )}
     </div>
