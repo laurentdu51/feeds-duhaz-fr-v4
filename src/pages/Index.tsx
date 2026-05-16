@@ -12,7 +12,7 @@ import ArticleModal from '@/components/ArticleModal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from '@/components/ui/pagination';
-import { RefreshCw, Filter, Rss, Plus } from 'lucide-react';
+import { RefreshCw, Filter, Rss, Plus, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link, useNavigate } from 'react-router-dom';
 
