@@ -241,7 +241,6 @@ const CategoryFilter = ({
           <div className="flex items-center gap-2 mb-1">
             <Pin className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-medium text-muted-foreground">Articles épinglés</span>
-            <Badge variant="secondary">{pinnedCount}</Badge>
           </div>
           {pinnedArticles.length === 0 ? (
                   <div className="text-center py-4 text-muted-foreground text-sm border rounded-lg bg-card">
