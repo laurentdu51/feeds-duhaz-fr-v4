@@ -1,54 +1,31 @@
-## Objectif
+# Correctif : erreur de chargement sur "Mes flux"
 
-Unifier tous les filtres de la sidebar dans une seule zone visuelle cohérente, sans séparateurs ni sous-blocs distincts.
+## Diagnostic
 
-## État actuel
+Dans `src/hooks/useRealArticles.tsx`, branche `showFollowedOnly` (= page "Mes flux"), la requête des articles non-lus utilise :
 
-Le composant `CategoryFilter.tsx` affiche actuellement deux zones distinctes séparées par un `border-t` :
-1. **Filtres par type de flux** (Toutes, RSS, YouTube, etc.) en colonne pleine largeur
-2. **Sous-blocs hétérogènes** (Affichage / Articles lus / Période) en `flex-wrap` avec leurs propres en-têtes
-3. **Articles épinglés** en pleine largeur en bas
-
-Chaque sous-bloc a son propre titre + icône, ce qui crée du bruit visuel.
-
-## Proposition
-
-Regrouper tous les filtres dans une **seule section unifiée** avec :
-
-- Un seul en-tête `Filter` + "Filtres" en haut
-- Une seule grille verticale de groupes de boutons, sans `border-t` ni `flex-wrap` horizontal
-- Chaque groupe (Type de flux, Affichage, Articles lus, Période) devient une simple ligne de label discret + boutons en dessous, espacés uniformément (`space-y-4`)
-- Articles épinglés restent en bas dans la même carte, séparés uniquement par un fin `border-t` (ou un petit espace) puisqu'ils sont d'une nature différente (contenu vs filtres)
-
-```text
-┌─ Filtres ─────────────────┐
-│  Type de flux             │
-│  [Toutes] [RSS] [YT]...   │
-│                           │
-│  Affichage                │
-│  [Mes flux] [Découverte]  │
-│                           │
-│  Articles lus             │
-│  [Afficher les lus]       │
-│                           │
-│  Période                  │
-│  [Tous] [Auj] [Hier]      │
-├───────────────────────────┤
-│  Articles épinglés (3)    │
-│  • article 1              │
-│  • article 2              │
-│  • article 3              │
-└───────────────────────────┘
+```ts
+.or(`user_articles.is.null,user_articles.is_read.eq.false`)
 ```
 
-## Détails techniques (`src/components/CategoryFilter.tsx`)
+sans l'option `{ referencedTable: 'user_articles' }`. Du coup PostgREST applique le filtre `.or(...)` sur la table principale `articles` (qui n'a ni `user_articles.is` ni `user_articles.is_read`) → la requête renvoie une erreur 400 et le toast "Erreur lors du chargement des articles" s'affiche à chaque rafraîchissement.
 
-- Supprimer le `border-t` et la structure `flex flex-wrap items-start gap-4` qui isole les sous-blocs
-- Remplacer par un simple `space-y-4` vertical
-- Uniformiser les en-têtes de groupe : petit label en `text-xs uppercase tracking-wide text-muted-foreground` au lieu d'icône + texte plus gros, pour réduire le poids visuel
-- Garder l'en-tête principal "Filtres" en haut de la carte
-- Catégories (type de flux) deviennent un groupe parmi les autres au lieu d'avoir un statut spécial
-- Articles épinglés gardent leur séparateur `border-t` car c'est du contenu, pas un filtre
-- Aucune modification de logique : props, états et callbacks inchangés
+La branche "découverte" plus bas dans le même fichier utilise déjà la bonne syntaxe avec `{ referencedTable: 'user_articles' }`, ce qui confirme le diagnostic.
 
-Aucun changement dans `Index.tsx` ni `Header.tsx`.
+Problème secondaire dans la même requête : le join `user_articles!left(...)` ne filtre pas sur `user_id`, donc les états read/pinned d'autres utilisateurs peuvent fuiter dans le résultat.
+
+## Changements
+
+**`src/hooks/useRealArticles.tsx`** (branche `showFollowedOnly`, requête `regularQuery` non-lus, ~ligne 85-94) :
+
+1. Ajouter `referencedTable: 'user_articles'` au `.or(...)` pour que le filtre s'applique bien à la table embarquée.
+2. Filtrer le join `user_articles` sur l'utilisateur courant pour éviter de mélanger des états entre utilisateurs (ajout d'un `.eq('user_articles.user_id', user.id)` compatible avec le left join, ou passage à un filtre côté embed).
+
+Aucun autre fichier impacté ; pas de changement de schéma ni de logique métier au-delà du correctif de requête.
+
+## Vérification
+
+Après le fix :
+- Recharger la page "Mes flux" connecté → plus de toast d'erreur.
+- Les articles non-lus des flux suivis s'affichent normalement.
+- Les épinglés restent visibles (requête `pinnedQuery` inchangée).

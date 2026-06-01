@@ -87,10 +87,10 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
             .select(`
               *,
               feeds!inner(name, category, type, status),
-              user_articles!left(is_read, is_pinned)
+              user_articles!left(is_read, is_pinned, user_id)
             `)
             .in('feed_id', followedFeedIds)
-            .or(`user_articles.is.null,user_articles.is_read.eq.false`)
+            .or(`user_id.is.null,and(user_id.eq.${user.id},is_read.eq.false)`, { referencedTable: 'user_articles' })
             .eq('feeds.status', 'active');
         } else {
           regularQuery = supabase
@@ -98,11 +98,13 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
             .select(`
               *,
               feeds!inner(name, category, type, status),
-              user_articles(is_read, is_pinned)
+              user_articles(is_read, is_pinned, user_id)
             `)
             .in('feed_id', followedFeedIds)
+            .or(`user_id.is.null,user_id.eq.${user.id}`, { referencedTable: 'user_articles' })
             .eq('feeds.status', 'active');
         }
+
         
         if (dateStart && dateEnd) {
           regularQuery = regularQuery.gte('published_at', dateStart).lte('published_at', dateEnd);
