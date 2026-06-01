@@ -1,31 +1,28 @@
-# Correctif : erreur de chargement sur "Mes flux"
+# Correctif : « Marquer lu » ne fonctionne pas
 
 ## Diagnostic
 
-Dans `src/hooks/useRealArticles.tsx`, branche `showFollowedOnly` (= page "Mes flux"), la requête des articles non-lus utilise :
+Le clic sur « Marquer lu » appelle `markAsRead` dans `src/hooks/useRealArticles.tsx` (ligne 335), qui fait un `upsert` sur `public.user_articles`. Côté schéma :
 
-```ts
-.or(`user_articles.is.null,user_articles.is_read.eq.false`)
-```
+- La RLS est bien activée et il existe une politique `FOR ALL TO authenticated USING (auth.uid() = user_id)` (migration `20250611112005`).
+- **Mais aucune migration ne fait de `GRANT` sur `public.user_articles`.**
 
-sans l'option `{ referencedTable: 'user_articles' }`. Du coup PostgREST applique le filtre `.or(...)` sur la table principale `articles` (qui n'a ni `user_articles.is` ni `user_articles.is_read`) → la requête renvoie une erreur 400 et le toast "Erreur lors du chargement des articles" s'affiche à chaque rafraîchissement.
+Sur l'instance self-hébergée (`data.duhaz.fr`), PostgREST n'accorde **pas** les privilèges par défaut sur le schéma `public` aux rôles `anon`/`authenticated`. Sans `GRANT`, l'upsert échoue silencieusement (le `markAsRead` actuel ne fait que `console.error` sans toast → l'UI ne change pas, l'utilisateur a l'impression que rien ne se passe). C'est cohérent avec la règle déjà mémorisée pour ce projet (« Data API ne grant plus le schéma public par défaut »).
 
-La branche "découverte" plus bas dans le même fichier utilise déjà la bonne syntaxe avec `{ referencedTable: 'user_articles' }`, ce qui confirme le diagnostic.
-
-Problème secondaire dans la même requête : le join `user_articles!left(...)` ne filtre pas sur `user_id`, donc les états read/pinned d'autres utilisateurs peuvent fuiter dans le résultat.
+Les autres opérations (`togglePin`, `deleteArticle`) sont impactées par le même problème, même si elles affichent un toast d'erreur générique.
 
 ## Changements
 
-**`src/hooks/useRealArticles.tsx`** (branche `showFollowedOnly`, requête `regularQuery` non-lus, ~ligne 85-94) :
+**Nouvelle migration** : ajouter les `GRANT` manquants pour `public.user_articles`.
 
-1. Ajouter `referencedTable: 'user_articles'` au `.or(...)` pour que le filtre s'applique bien à la table embarquée.
-2. Filtrer le join `user_articles` sur l'utilisateur courant pour éviter de mélanger des états entre utilisateurs (ajout d'un `.eq('user_articles.user_id', user.id)` compatible avec le left join, ou passage à un filtre côté embed).
+```sql
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.user_articles TO authenticated;
+GRANT ALL ON public.user_articles TO service_role;
+```
 
-Aucun autre fichier impacté ; pas de changement de schéma ni de logique métier au-delà du correctif de requête.
+Pas de `GRANT` à `anon` (table strictement réservée à l'utilisateur connecté, comme indiqué dans la mémoire `rls-article-access`).
 
 ## Vérification
 
-Après le fix :
-- Recharger la page "Mes flux" connecté → plus de toast d'erreur.
-- Les articles non-lus des flux suivis s'affichent normalement.
-- Les épinglés restent visibles (requête `pinnedQuery` inchangée).
+- Recharger l'app, cliquer sur « Marquer lu » sur un article → l'article disparaît (ou passe en grisé en mode « Lus inclus »), pas d'erreur réseau 401/permission denied sur `/rest/v1/user_articles`.
+- `Épingler` et `Supprimer` continuent de fonctionner sans toast d'erreur.
