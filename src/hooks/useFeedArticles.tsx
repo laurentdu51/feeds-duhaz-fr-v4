@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { NewsItem } from '@/types/news';
 import { toast } from 'sonner';
+import { markUserArticleAsRead } from '@/utils/userArticles';
 
 const ARTICLES_PER_PAGE = 100;
 const FETCH_LIMIT = 200;
@@ -150,20 +151,15 @@ export function useFeedArticles(feedId: string, page: number = 1) {
       const article = articles.find(a => a.id === articleId);
       if (!article || article.isRead) return;
 
-      const { error } = await supabase
-        .from('user_articles')
-        .upsert({
-          user_id: user.id,
-          article_id: articleId,
-          is_read: true,
-          is_pinned: article.isPinned,
-          read_at: new Date().toISOString()
-        }, {
-          onConflict: 'user_id,article_id'
-        });
+      const error = await markUserArticleAsRead({
+        userId: user.id,
+        articleId,
+        isPinned: article.isPinned
+      });
 
       if (error) {
         console.error('Error marking as read:', error);
+        toast.error('Erreur lors du marquage comme lu');
         return;
       }
 
