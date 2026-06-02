@@ -88,10 +88,10 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
             .select(`
               *,
               feeds!inner(name, category, type, status),
-              user_articles!left(is_read, is_pinned, user_id)
+              user_articles!left(is_read, is_pinned)
             `)
             .in('feed_id', followedFeedIds)
-            .or(`user_id.is.null,and(user_id.eq.${user.id},is_read.eq.false)`, { referencedTable: 'user_articles' })
+            .or('user_articles.is.null,user_articles.is_read.eq.false')
             .eq('feeds.status', 'active');
         } else {
           regularQuery = supabase
@@ -99,10 +99,9 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
             .select(`
               *,
               feeds!inner(name, category, type, status),
-              user_articles(is_read, is_pinned, user_id)
+              user_articles(is_read, is_pinned)
             `)
             .in('feed_id', followedFeedIds)
-            .or(`user_id.is.null,user_id.eq.${user.id}`, { referencedTable: 'user_articles' })
             .eq('feeds.status', 'active');
         }
 
@@ -169,11 +168,12 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
           .eq('feeds.status', 'active');
         
         if (knownFeedIds.length > 0) {
-          discoveryQuery = discoveryQuery.not('feed_id', 'in', `(${knownFeedIds.join(',')})`);
+          const quoted = knownFeedIds.map(id => `"${id}"`).join(',');
+          discoveryQuery = discoveryQuery.not('feed_id', 'in', `(${quoted})`);
         }
         
         if (!showReadArticles && user) {
-          discoveryQuery = discoveryQuery.or('user_articles.is.null,user_articles.is_read.eq.false', { referencedTable: 'user_articles' });
+          discoveryQuery = discoveryQuery.or('user_articles.is.null,user_articles.is_read.eq.false');
         }
         
         discoveryQuery = discoveryQuery
@@ -188,23 +188,26 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
           return;
         }
         
-        const formattedArticles = (discoveryArticles || []).map(article => ({
-          id: article.id,
-          title: article.title,
-          description: article.description || '',
-          content: article.content || '',
-          publishedAt: article.published_at,
-          source: article.feeds.name,
-          category: (article.feeds.type?.startsWith('rss') ? 'rss' : article.feeds.type) as 'rss' | 'youtube' | 'steam' | 'actualites',
-          url: article.url || '',
-          imageUrl: article.image_url,
-          isPinned: false,
-          isRead: article.user_articles?.[0]?.is_read || false,
-          feedId: article.feed_id,
-          readTime: article.read_time || 5,
-          isDiscovery: true,
-          lastSeenAt: article.last_seen_at || undefined
-        }));
+        const knownSet = new Set(knownFeedIds);
+        const formattedArticles = (discoveryArticles || [])
+          .filter(article => !knownSet.has(article.feed_id))
+          .map(article => ({
+            id: article.id,
+            title: article.title,
+            description: article.description || '',
+            content: article.content || '',
+            publishedAt: article.published_at,
+            source: article.feeds.name,
+            category: (article.feeds.type?.startsWith('rss') ? 'rss' : article.feeds.type) as 'rss' | 'youtube' | 'steam' | 'actualites',
+            url: article.url || '',
+            imageUrl: article.image_url,
+            isPinned: false,
+            isRead: article.user_articles?.[0]?.is_read || false,
+            feedId: article.feed_id,
+            readTime: article.read_time || 5,
+            isDiscovery: true,
+            lastSeenAt: article.last_seen_at || undefined
+          }));
         
         setArticles(formattedArticles);
       } else {
