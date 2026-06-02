@@ -91,7 +91,6 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
               user_articles!left(is_read, is_pinned)
             `)
             .in('feed_id', followedFeedIds)
-            .or('user_articles.is.null,user_articles.is_read.eq.false')
             .eq('feeds.status', 'active');
         } else {
           regularQuery = supabase
@@ -128,6 +127,10 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
 
         // Transform to NewsItem format
         const transformedArticles: NewsItem[] = uniqueArticles
+          ?.filter(article => {
+            const isRead = article.user_articles?.[0]?.is_read || false;
+            return showReadArticles || !isRead;
+          })
           ?.map(article => ({
             id: article.id,
             title: article.title,
@@ -172,10 +175,6 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
           discoveryQuery = discoveryQuery.not('feed_id', 'in', `(${quoted})`);
         }
         
-        if (!showReadArticles && user) {
-          discoveryQuery = discoveryQuery.or('user_articles.is.null,user_articles.is_read.eq.false');
-        }
-        
         discoveryQuery = discoveryQuery
           .order('published_at', { ascending: false })
           .limit(100);
@@ -191,6 +190,10 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
         const knownSet = new Set(knownFeedIds);
         const formattedArticles = (discoveryArticles || [])
           .filter(article => !knownSet.has(article.feed_id))
+          .filter(article => {
+            const isRead = article.user_articles?.[0]?.is_read || false;
+            return showReadArticles || !isRead;
+          })
           .map(article => ({
             id: article.id,
             title: article.title,
