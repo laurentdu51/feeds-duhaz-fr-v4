@@ -269,68 +269,7 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Chips de filtres actifs */}
-            {(() => {
-              const chips: { key: string; label: string; onRemove: () => void }[] = [];
-              if (selectedCategory) {
-                const cat = categories.find(c => c.id === selectedCategory);
-                if (cat) chips.push({ key: 'cat', label: `Type : ${cat.name}`, onRemove: () => setSelectedCategory(null) });
-              }
-              if (searchQuery) {
-                chips.push({ key: 'search', label: `Recherche : "${searchQuery}"`, onRemove: () => setSearchQuery('') });
-              }
-              if (user && showFollowedOnly) {
-                chips.push({ key: 'view', label: 'Mes flux', onRemove: () => handleViewModeChange('all') });
-              }
-              if (user && showDiscoveryMode) {
-                chips.push({ key: 'view', label: 'Découverte', onRemove: () => handleViewModeChange('all') });
-              }
-              if (dateFilter) {
-                chips.push({
-                  key: 'date',
-                  label: dateFilter === 'today' ? "Aujourd'hui" : 'Hier',
-                  onRemove: () => setDateFilter(null),
-                });
-              }
-              if (showReadArticles) {
-                chips.push({ key: 'read', label: 'Lus affichés', onRemove: () => setShowReadArticles(false) });
-              }
-              if (chips.length === 0) return null;
-              return (
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs uppercase tracking-wide text-muted-foreground font-medium">Filtres actifs</span>
-                  {chips.map((chip, idx) => (
-                    <Badge key={`${chip.key}-${idx}`} variant="secondary" className="gap-1 pr-1 pl-2 py-1">
-                      <span className="text-xs">{chip.label}</span>
-                      <button
-                        type="button"
-                        onClick={chip.onRemove}
-                        aria-label={`Retirer ${chip.label}`}
-                        className="ml-1 rounded-sm hover:bg-muted-foreground/20 p-0.5"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                  {chips.length > 1 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 px-2 text-xs"
-                      onClick={() => {
-                        setSelectedCategory(null);
-                        setSearchQuery('');
-                        setDateFilter(null);
-                        setShowReadArticles(false);
-                        if (showFollowedOnly || showDiscoveryMode) handleViewModeChange('all');
-                      }}
-                    >
-                      Tout effacer
-                    </Button>
-                  )}
-                </div>
-              );
-            })()}
+            
             
             {regularArticles.length === 0 && articles.length > 0 ? <div className="text-center py-12">
                 <p className="text-muted-foreground text-lg">Aucun article trouvé avec ces filtres</p>
