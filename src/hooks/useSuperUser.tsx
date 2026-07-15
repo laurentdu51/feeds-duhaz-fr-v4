@@ -21,13 +21,11 @@ export function useSuperUser() {
       });
       
       if (error) {
-        console.error('Error checking super user status:', error);
         setIsSuperUser(false);
       } else {
         setIsSuperUser(data || false);
       }
     } catch (error) {
-      console.error('Error in checkSuperUserStatus:', error);
       setIsSuperUser(false);
     } finally {
       setLoading(false);

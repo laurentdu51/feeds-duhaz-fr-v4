@@ -27,7 +27,6 @@ export function useFeedUpdate() {
         throw new Error(data.error || 'Erreur lors de la mise à jour');
       }
     } catch (error) {
-      console.error('Error updating feed:', error);
       toast.error('Erreur lors de la mise à jour du flux');
       throw error;
     } finally {

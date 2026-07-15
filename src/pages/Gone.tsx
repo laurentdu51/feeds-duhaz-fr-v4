@@ -6,10 +6,7 @@ const Gone = () => {
   const location = useLocation();
 
   useEffect(() => {
-    console.warn(
-      "410 Gone: User attempted to access permanently removed content:",
-      location.pathname
-    );
+    // 410: contenu définitivement supprimé
   }, [location.pathname]);
 
   return (

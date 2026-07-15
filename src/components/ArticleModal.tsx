@@ -60,11 +60,9 @@ const ArticleModal = ({ isOpen, onClose, article }: ArticleModalProps) => {
     for (const pattern of patterns) {
       const match = url.match(pattern);
       if (match && match[1]) {
-        console.log('YouTube video ID extracted:', match[1]);
         return match[1];
       }
     }
-    console.log('No YouTube video ID found in URL:', url);
     return null;
   };
 

@@ -26,7 +26,6 @@ export function useArticles() {
           .eq('is_followed', true);
 
         if (userFeedsError) {
-          console.error('Error fetching user feeds:', userFeedsError);
           toast.error('Erreur lors du chargement de vos flux');
           return;
         }
@@ -51,7 +50,6 @@ export function useArticles() {
         setArticles(newsItems);
       }
     } catch (error) {
-      console.error('Error in fetchArticles:', error);
       toast.error('Erreur lors du chargement des articles');
     } finally {
       setLoading(false);
