@@ -25,7 +25,6 @@ export function useEnhancedFeeds() {
 
       if (feedsError) {
         toast.error('Erreur lors du chargement des flux');
-        console.error('Error fetching feeds:', feedsError);
         return;
       }
 
@@ -38,7 +37,7 @@ export function useEnhancedFeeds() {
           .eq('user_id', user.id);
 
         if (error) {
-          console.error('Error fetching user feeds:', error);
+          // Silently ignore user feeds fetch error
         } else {
           userFeedsData = data;
         }
@@ -60,7 +59,6 @@ export function useEnhancedFeeds() {
 
       setFeeds(combinedFeeds);
     } catch (error) {
-      console.error('Error in fetchFeeds:', error);
       toast.error('Erreur lors du chargement des flux');
     } finally {
       setLoading(false);
@@ -126,7 +124,6 @@ export function useEnhancedFeeds() {
           : `Vous suivez maintenant "${feed.name}"`
       );
     } catch (error) {
-      console.error('Error toggling follow:', error);
       toast.error('Erreur lors de la mise à jour');
     }
   };
@@ -153,7 +150,6 @@ export function useEnhancedFeeds() {
         throw new Error(data.error || 'Erreur lors de la récupération RSS');
       }
     } catch (error) {
-      console.error('Error fetching feed content:', error);
       toast.error('Erreur lors de la récupération du contenu');
     }
   };
