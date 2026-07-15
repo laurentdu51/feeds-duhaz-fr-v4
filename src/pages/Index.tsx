@@ -71,7 +71,7 @@ const Index = () => {
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null);
   const [isArticleModalOpen, setIsArticleModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  console.log('🏠 Index page - Articles count:', articles.length, 'Loading:', loading, 'User:', !!user);
+  
   const filteredNews = useMemo(() => {
     let filtered = articles;
     if (selectedCategory) {
@@ -144,7 +144,6 @@ const Index = () => {
     toast.success("Flux actualisés");
   };
   const handleAddFeed = (feedData: any) => {
-    console.log('Nouveau flux ajouté:', feedData);
     toast.success(`Flux "${feedData.name}" ajouté avec succès!`);
   };
   const handleOpenArticle = useCallback((article: NewsItem) => {
