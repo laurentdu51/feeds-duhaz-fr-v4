@@ -95,7 +95,6 @@ const FeedsManagement = () => {
         .single();
 
       if (error) {
-        console.error('Error adding feed:', error);
         toast.error('Erreur lors de l\'ajout du flux');
         return;
       }
@@ -112,7 +111,6 @@ const FeedsManagement = () => {
         });
 
         if (testError) {
-          console.error('Error testing feed:', testError);
           toast.warning('Flux ajouté mais le test de récupération a échoué');
         } else if (testResult.success) {
           // If test successful, update status to active
@@ -122,7 +120,6 @@ const FeedsManagement = () => {
             .eq('id', newFeed.id);
 
           if (updateError) {
-            console.error('Error updating feed status:', updateError);
             toast.warning('Flux testé avec succès mais impossible de l\'activer automatiquement');
           } else {
             toast.success(`Flux activé automatiquement ! ${testResult.articlesProcessed} articles récupérés`);
@@ -131,14 +128,12 @@ const FeedsManagement = () => {
           toast.warning('Flux ajouté mais le test de récupération a échoué');
         }
       } catch (testError) {
-        console.error('Error testing feed:', testError);
         toast.warning('Flux ajouté mais le test de récupération a échoué');
       }
 
       // Refetch feeds to show the updated status
       await refetch();
     } catch (error) {
-      console.error('Error adding feed:', error);
       toast.error('Erreur lors de l\'ajout du flux');
     }
   };
@@ -165,7 +160,6 @@ const FeedsManagement = () => {
         .eq('id', selectedFeed.id);
 
       if (error) {
-        console.error('Error updating feed:', error);
         toast.error('Erreur lors de la mise à jour du flux');
         return;
       }
@@ -174,7 +168,6 @@ const FeedsManagement = () => {
       setIsEditFeedModalOpen(false);
       await refetch();
     } catch (error) {
-      console.error('Error updating feed:', error);
       toast.error('Erreur lors de la mise à jour du flux');
     }
   };
@@ -191,7 +184,6 @@ const FeedsManagement = () => {
         .eq('id', feed.id);
 
       if (error) {
-        console.error('Error toggling feed status:', error);
         toast.error('Erreur lors du changement de statut');
         return;
       }
@@ -199,7 +191,6 @@ const FeedsManagement = () => {
       toast.success(`Flux ${newStatus === 'active' ? 'activé' : 'désactivé'} avec succès`);
       await refetch();
     } catch (error) {
-      console.error('Error toggling feed status:', error);
       toast.error('Erreur lors du changement de statut');
     }
   };
@@ -215,7 +206,6 @@ const FeedsManagement = () => {
         .eq('feed_id', feed.id);
 
       if (articlesError) {
-        console.error('Error deleting articles:', articlesError);
         toast.error('Erreur lors de la suppression des articles');
         return;
       }
@@ -227,7 +217,6 @@ const FeedsManagement = () => {
         .eq('feed_id', feed.id);
 
       if (userFeedsError) {
-        console.error('Error deleting user feeds relations:', userFeedsError);
         toast.error('Erreur lors de la suppression des relations utilisateur');
         return;
       }
@@ -239,7 +228,6 @@ const FeedsManagement = () => {
         .eq('id', feed.id);
 
       if (feedError) {
-        console.error('Error deleting feed:', feedError);
         toast.error('Erreur lors de la suppression du flux');
         return;
       }
@@ -247,7 +235,6 @@ const FeedsManagement = () => {
       toast.success('Flux supprimé avec succès');
       await refetch();
     } catch (error) {
-      console.error('Error deleting feed:', error);
       toast.error('Erreur lors de la suppression du flux');
     }
   };

@@ -60,7 +60,6 @@ const FeedForm = ({ selectedType, onSubmit, onCancel, categories }: FeedFormProp
     // If it's a YouTube feed, convert the URL to RSS format
     if (selectedType === 'youtube') {
       processedUrl = convertYouTubeToRSS(data.url);
-      console.log('YouTube URL converted:', { original: data.url, converted: processedUrl });
     }
     
     const feedData = {
@@ -103,7 +102,6 @@ const FeedForm = ({ selectedType, onSubmit, onCancel, categories }: FeedFormProp
           setShowInstructions(true);
         }
       } catch (error) {
-        console.error('Error fetching YouTube RSS:', error);
         setUrlWarning('Erreur lors de la détection automatique. Veuillez utiliser les instructions ci-dessous.');
         setShowInstructions(true);
       }
@@ -137,7 +135,6 @@ const FeedForm = ({ selectedType, onSubmit, onCancel, categories }: FeedFormProp
           setUrlWarning('Aucun flux RSS détecté automatiquement sur ce site.');
         }
       } catch (error) {
-        console.error('Error fetching website RSS:', error);
         setUrlWarning('Erreur lors de la détection automatique du flux RSS.');
       }
       

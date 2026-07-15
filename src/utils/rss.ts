@@ -14,19 +14,15 @@ interface FetchRSSResult {
 
 export async function fetchWebsiteRSS(url: string): Promise<FetchRSSResult | null> {
   try {
-    console.log('Fetching RSS for website:', url);
-
     const { data, error } = await supabase.functions.invoke('fetch-website-rss', {
       body: { url }
     });
 
     if (error) {
-      console.error('Error calling fetch-website-rss:', error);
       return null;
     }
 
     if (!data.success) {
-      console.error('RSS detection failed:', data.error);
       return null;
     }
 
@@ -36,7 +32,6 @@ export async function fetchWebsiteRSS(url: string): Promise<FetchRSSResult | nul
       feeds: data.feeds,
     };
   } catch (error) {
-    console.error('Error fetching website RSS:', error);
     return null;
   }
 }

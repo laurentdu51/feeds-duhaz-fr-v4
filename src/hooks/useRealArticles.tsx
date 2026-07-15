@@ -5,8 +5,6 @@ import { NewsItem } from '@/types/news';
 import { toast } from 'sonner';
 import { markUserArticleAsRead } from '@/utils/userArticles';
 
-const isDev = import.meta.env.DEV;
-
 export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showFollowedOnly?: boolean, showReadArticles?: boolean, showDiscoveryMode?: boolean) {
   const [articles, setArticles] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -15,7 +13,6 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
   const fetchArticles = useCallback(async () => {
     try {
       setLoading(true);
-      if (isDev) console.log('🔄 Fetching articles...', { user: !!user, dateFilter, showFollowedOnly });
       
       // Calculate date ranges for filtering
       let dateStart = null;
@@ -45,7 +42,6 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
           .eq('is_followed', true);
 
         if (userFeedsError) {
-          if (isDev) console.error('❌ Error fetching user feeds:', userFeedsError);
           toast.error('Erreur lors du chargement de vos flux');
           return;
         }
@@ -75,8 +71,8 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
           .order('published_at', { ascending: false })
           .limit(100);
 
-        if (pinnedError && isDev) {
-          console.error('❌ Error fetching pinned articles:', pinnedError);
+        if (pinnedError) {
+          // Silently ignore pinned articles fetch error
         }
 
         // Fetch regular articles (with date filter if specified)
@@ -114,7 +110,6 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
           .limit(200);
 
         if (regularError) {
-          if (isDev) console.error('❌ Error fetching regular articles:', regularError);
           toast.error('Erreur lors du chargement des articles');
           return;
         }
@@ -182,7 +177,6 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
         const { data: discoveryArticles, error: discoveryError } = await discoveryQuery;
         
         if (discoveryError) {
-          if (isDev) console.error('❌ Error fetching discovery articles:', discoveryError);
           toast.error('Erreur lors du chargement des articles en découverte');
           return;
         }
@@ -253,7 +247,6 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
           .limit(200);
 
         if (regularError) {
-          if (isDev) console.error('❌ Error fetching regular articles:', regularError);
           toast.error('Erreur lors du chargement des articles');
           return;
         }
@@ -295,7 +288,6 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
         setArticles(transformedArticles.slice(0, 100));
       }
     } catch (error) {
-      if (isDev) console.error('💥 Error in fetchArticles:', error);
       toast.error('Erreur lors du chargement des articles');
     } finally {
       setLoading(false);
@@ -334,7 +326,6 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
       
       toast.success(article.isPinned ? "Article retiré des épinglés" : "Article épinglé");
     } catch (error) {
-      if (isDev) console.error('Error toggling pin:', error);
       toast.error('Erreur lors de la mise à jour');
     }
   }, [user, articles]);
@@ -353,7 +344,6 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
       });
 
       if (error) {
-        if (isDev) console.error('Error marking as read:', error);
         toast.error('Erreur lors du marquage comme lu');
         return;
       }
@@ -364,7 +354,6 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
         setArticles(prev => prev.map(item => item.id === articleId ? { ...item, isRead: true } : item));
       }
     } catch (error) {
-      if (isDev) console.error('Error marking as read:', error);
     }
   }, [user, articles, showReadArticles]);
 
@@ -389,7 +378,6 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
       setArticles(prev => prev.filter(item => item.id !== articleId));
       toast.success("Article supprimé de votre vue");
     } catch (error) {
-      if (isDev) console.error('Error deleting article:', error);
       toast.error('Erreur lors de la suppression');
     }
   }, [user]);
@@ -413,7 +401,6 @@ export function useRealArticles(dateFilter?: 'today' | 'yesterday' | null, showF
         throw new Error(data.error || 'Erreur lors de la récupération RSS');
       }
     } catch (error) {
-      if (isDev) console.error('Error fetching RSS:', error);
       toast.error('Erreur lors de la récupération du contenu RSS');
     }
   };

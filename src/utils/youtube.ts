@@ -42,7 +42,6 @@ export const convertYouTubeToRSS = (url: string): string => {
     }
     
     // For other formats, warn that it might not work
-    console.warn(`YouTube RSS URL might not work for custom username: ${channelId}. You may need to find the actual channel ID starting with 'UC'`);
     return `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
   }
   
@@ -100,7 +99,6 @@ export const fetchYouTubeRSSUrl = async (url: string): Promise<{rssUrl: string, 
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session?.access_token) {
-      console.error('No active session for fetch-youtube-rss');
       return null;
     }
 
@@ -114,16 +112,12 @@ export const fetchYouTubeRSSUrl = async (url: string): Promise<{rssUrl: string, 
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Failed to fetch YouTube RSS:', errorData.error);
       return null;
     }
 
     const data = await response.json();
-    console.log('Successfully fetched YouTube RSS data:', data);
     return data;
   } catch (error) {
-    console.error('Error fetching YouTube RSS:', error);
     return null;
   }
 };
@@ -133,12 +127,10 @@ export const fetchYouTubeChannelName = async (url: string): Promise<string | nul
   // First, try to extract name from URL if it's an @username format
   const urlName = extractChannelNameFromUrl(url);
   if (urlName) {
-    console.log('Extracted channel name from URL:', urlName);
     return urlName;
   }
 
   // If we can't extract from URL, return null instead of trying CORS proxies
   // which are often blocked or unreliable
-  console.log('Could not extract channel name from URL, manual entry required');
   return null;
 };

@@ -25,7 +25,6 @@ export function useFeedArticles(feedId: string, page: number = 1) {
   const fetchFeedArticles = async () => {
     try {
       setLoading(true);
-      console.log('🔄 Fetching articles for feed:', feedId, 'page:', page);
 
       // Fetch feed info
       const { data: feed, error: feedError } = await supabase
@@ -35,7 +34,6 @@ export function useFeedArticles(feedId: string, page: number = 1) {
         .single();
 
       if (feedError) {
-        console.error('❌ Error fetching feed info:', feedError);
         toast.error('Flux introuvable');
         return;
       }
@@ -72,12 +70,9 @@ export function useFeedArticles(feedId: string, page: number = 1) {
       const { data: articlesData, error: articlesError } = await query;
 
       if (articlesError) {
-        console.error('❌ Error fetching articles:', articlesError);
         toast.error('Erreur lors du chargement des articles');
         return;
       }
-
-      console.log('📰 Articles found:', articlesData?.length || 0);
 
       // Transform to NewsItem format
       const transformedArticles: NewsItem[] = articlesData
@@ -100,7 +95,6 @@ export function useFeedArticles(feedId: string, page: number = 1) {
 
       setArticles(transformedArticles.slice(0, ARTICLES_PER_PAGE));
     } catch (error) {
-      console.error('💥 Error in fetchFeedArticles:', error);
       toast.error('Erreur lors du chargement des articles');
     } finally {
       setLoading(false);
@@ -139,7 +133,6 @@ export function useFeedArticles(feedId: string, page: number = 1) {
       
       toast.success(article.isPinned ? "Article retiré des épinglés" : "Article épinglé");
     } catch (error) {
-      console.error('Error toggling pin:', error);
       toast.error('Erreur lors de la mise à jour');
     }
   };
@@ -158,7 +151,6 @@ export function useFeedArticles(feedId: string, page: number = 1) {
       });
 
       if (error) {
-        console.error('Error marking as read:', error);
         toast.error('Erreur lors du marquage comme lu');
         return;
       }
@@ -167,7 +159,6 @@ export function useFeedArticles(feedId: string, page: number = 1) {
         item.id === articleId ? { ...item, isRead: true } : item
       ));
     } catch (error) {
-      console.error('Error marking as read:', error);
     }
   };
 
@@ -192,7 +183,6 @@ export function useFeedArticles(feedId: string, page: number = 1) {
       setArticles(prev => prev.filter(item => item.id !== articleId));
       toast.success("Article supprimé de votre vue");
     } catch (error) {
-      console.error('Error deleting article:', error);
       toast.error('Erreur lors de la suppression');
     }
   };
