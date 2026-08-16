@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Pin, ArrowLeft } from "lucide-react";
 import { useRealArticles } from "@/hooks/useRealArticles";
@@ -9,28 +9,47 @@ import { NewsItem } from "@/types/news";
 import { Button } from "@/components/ui/button";
 import { SEO } from "@/components/SEO";
 
+const LoadingScreen = () => (
+  <div className="min-h-screen bg-background flex items-center justify-center">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" role="status" aria-label="Chargement" />
+  </div>
+);
+
+/**
+ * Guard : ne monte le contenu (et donc le chargement des articles)
+ * qu'une fois la session résolue et l'utilisateur authentifié,
+ * y compris en navigation directe / hard refresh.
+ */
 const Pinned = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/auth", { replace: true });
+    }
+  }, [authLoading, user, navigate]);
+
+  if (authLoading || !user) {
+    return <LoadingScreen />;
+  }
+
+  return <PinnedContent />;
+};
+
+const PinnedContent = () => {
+  const navigate = useNavigate();
   const { articles, loading, togglePin, markAsRead, deleteArticle } = useRealArticles();
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null);
 
-  // Redirect if not authenticated
-  if (!user) {
-    navigate("/auth");
-    return null;
-  }
-
-  // Filter only pinned articles
   const pinnedArticles = articles.filter(article => article.isPinned);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
+
+
+
 
   return (
     <div className="min-h-screen bg-background">
