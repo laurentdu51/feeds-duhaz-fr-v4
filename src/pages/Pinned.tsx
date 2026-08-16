@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Pin, ArrowLeft } from "lucide-react";
 import { useRealArticles } from "@/hooks/useRealArticles";
@@ -11,26 +11,28 @@ import { SEO } from "@/components/SEO";
 
 const Pinned = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { articles, loading, togglePin, markAsRead, deleteArticle } = useRealArticles();
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null);
 
-  // Redirect if not authenticated
-  if (!user) {
-    navigate("/auth");
-    return null;
-  }
+  // Redirect if not authenticated (once auth state is known)
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/auth", { replace: true });
+    }
+  }, [authLoading, user, navigate]);
 
   // Filter only pinned articles
   const pinnedArticles = articles.filter(article => article.isPinned);
 
-  if (loading) {
+  if (authLoading || loading || !user) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen bg-background">
