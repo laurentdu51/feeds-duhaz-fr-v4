@@ -22,6 +22,8 @@ import {
   isDirectRSSFeed
 } from '@/utils/youtube';
 import { fetchWebsiteRSS, isDirectRSSFeed as isDirectRSSUrl } from '@/utils/rss';
+import { convertSteamToRSS, extractSteamAppId, extractSteamGameName } from '@/utils/steam';
+
 import { feedTypeOptions } from './FeedTypeOptions';
 import { NewsCategory } from '@/types/news';
 import { AlertTriangle, Info } from 'lucide-react';
