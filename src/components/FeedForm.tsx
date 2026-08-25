@@ -63,6 +63,12 @@ const FeedForm = ({ selectedType, onSubmit, onCancel, categories }: FeedFormProp
     if (selectedType === 'youtube') {
       processedUrl = convertYouTubeToRSS(data.url);
     }
+
+    // If it's a Steam feed, convert the store URL to the news RSS feed
+    if (selectedType === 'steam') {
+      processedUrl = convertSteamToRSS(data.url);
+    }
+
     
     const feedData = {
       ...data,
