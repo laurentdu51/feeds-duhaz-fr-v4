@@ -22,6 +22,8 @@ import {
   isDirectRSSFeed
 } from '@/utils/youtube';
 import { fetchWebsiteRSS, isDirectRSSFeed as isDirectRSSUrl } from '@/utils/rss';
+import { convertSteamToRSS, extractSteamAppId, extractSteamGameName } from '@/utils/steam';
+
 import { feedTypeOptions } from './FeedTypeOptions';
 import { NewsCategory } from '@/types/news';
 import { AlertTriangle, Info } from 'lucide-react';
@@ -61,6 +63,12 @@ const FeedForm = ({ selectedType, onSubmit, onCancel, categories }: FeedFormProp
     if (selectedType === 'youtube') {
       processedUrl = convertYouTubeToRSS(data.url);
     }
+
+    // If it's a Steam feed, convert the store URL to the news RSS feed
+    if (selectedType === 'steam') {
+      processedUrl = convertSteamToRSS(data.url);
+    }
+
     
     const feedData = {
       ...data,
@@ -140,6 +148,26 @@ const FeedForm = ({ selectedType, onSubmit, onCancel, categories }: FeedFormProp
       
       setIsLoadingChannelName(false);
     }
+
+    // Steam: extract the app id from the store URL and build the news RSS feed
+    if (selectedType === 'steam' && url) {
+      const appId = extractSteamAppId(url);
+
+      if (appId) {
+        form.setValue('url', `https://store.steampowered.com/feeds/news/app/${appId}/`);
+
+        if (!form.getValues('name')) {
+          const gameName = extractSteamGameName(url);
+          if (gameName) {
+            form.setValue('name', gameName);
+          }
+        }
+
+        setUrlWarning(`✓ Jeu Steam détecté (app ${appId}). Flux d'actualités généré automatiquement.`);
+      } else {
+        setUrlWarning('Impossible de détecter l\'ID du jeu. Utilisez une URL du type https://store.steampowered.com/app/2713000/...');
+      }
+    }
   };
 
   const selectedTypeOption = feedTypeOptions.find(option => option.value === selectedType);
@@ -152,6 +180,8 @@ const FeedForm = ({ selectedType, onSubmit, onCancel, categories }: FeedFormProp
         return 'https://example.com (le flux RSS sera détecté automatiquement)';
       case 'rss-manual':
         return 'https://example.com/feed.xml';
+      case 'steam':
+        return 'https://store.steampowered.com/app/2713000/Resonance_A_Plague_Tale_Legacy/';
       default:
         return 'https://...';
     }
@@ -164,8 +194,12 @@ const FeedForm = ({ selectedType, onSubmit, onCancel, categories }: FeedFormProp
     if (selectedType === 'rss-auto') {
       return 'Entrez l\'URL du site web et le flux RSS sera automatiquement détecté';
     }
+    if (selectedType === 'steam') {
+      return 'Collez l\'URL du jeu dans la boutique Steam : l\'ID est extrait et converti en flux d\'actualités';
+    }
     return null;
   };
+
 
   return (
     <Form {...form}>
