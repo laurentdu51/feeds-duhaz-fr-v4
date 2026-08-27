@@ -22,7 +22,7 @@ import {
   isDirectRSSFeed
 } from '@/utils/youtube';
 import { fetchWebsiteRSS, isDirectRSSFeed as isDirectRSSUrl } from '@/utils/rss';
-import { convertSteamToRSS, extractSteamAppId, extractSteamGameName } from '@/utils/steam';
+import { convertSteamToRSS, extractSteamAppId, extractSteamGameName, buildSteamRSSUrl } from '@/utils/steam';
 
 import { feedTypeOptions } from './FeedTypeOptions';
 import { NewsCategory } from '@/types/news';
@@ -58,32 +58,53 @@ const FeedForm = ({ selectedType, onSubmit, onCancel, categories }: FeedFormProp
 
   const handleSubmit = (data: FeedFormData) => {
     let processedUrl = data.url;
-    
+    let processedType = selectedType;
+
     // If it's a YouTube feed, convert the URL to RSS format
     if (selectedType === 'youtube') {
       processedUrl = convertYouTubeToRSS(data.url);
     }
 
-    // If it's a Steam feed, convert the store URL to the news RSS feed
-    if (selectedType === 'steam') {
+    // Steam: convert any store/community URL (whatever the selected type)
+    const steamAppId = extractSteamAppId(data.url);
+    if (steamAppId && /steam/i.test(data.url)) {
       processedUrl = convertSteamToRSS(data.url);
+      processedType = 'steam';
     }
 
-    
     const feedData = {
       ...data,
       url: processedUrl,
-      type: selectedType,
+      type: processedType,
       id: Date.now().toString(), // Simple ID generation
     };
     
     onSubmit(feedData);
   };
 
+
   const handleUrlChange = async (url: string) => {
     form.setValue('url', url);
     setUrlWarning(null);
     setShowInstructions(false);
+
+    // Steam détecté quel que soit le type choisi : on convertit tout de suite
+    if (url && /steam/i.test(url)) {
+      const appId = extractSteamAppId(url);
+      if (appId) {
+        form.setValue('url', buildSteamRSSUrl(appId));
+        if (!form.getValues('name')) {
+          const gameName = extractSteamGameName(url);
+          if (gameName) form.setValue('name', gameName);
+        }
+        setUrlWarning(`✓ Jeu Steam détecté (app ${appId}). Flux d'actualités généré automatiquement.`);
+      } else {
+        setUrlWarning('Impossible de détecter l\'ID du jeu. Utilisez une URL du type https://store.steampowered.com/app/2713000/...');
+      }
+      return;
+    }
+
+
     
     // If it's a YouTube URL, try to automatically fetch RSS URL and channel name
     if (selectedType === 'youtube' && url && url.includes('youtube.com')) {
@@ -148,27 +169,8 @@ const FeedForm = ({ selectedType, onSubmit, onCancel, categories }: FeedFormProp
       
       setIsLoadingChannelName(false);
     }
-
-    // Steam: extract the app id from the store URL and build the news RSS feed
-    if (selectedType === 'steam' && url) {
-      const appId = extractSteamAppId(url);
-
-      if (appId) {
-        form.setValue('url', `https://store.steampowered.com/feeds/news/app/${appId}/`);
-
-        if (!form.getValues('name')) {
-          const gameName = extractSteamGameName(url);
-          if (gameName) {
-            form.setValue('name', gameName);
-          }
-        }
-
-        setUrlWarning(`✓ Jeu Steam détecté (app ${appId}). Flux d'actualités généré automatiquement.`);
-      } else {
-        setUrlWarning('Impossible de détecter l\'ID du jeu. Utilisez une URL du type https://store.steampowered.com/app/2713000/...');
-      }
-    }
   };
+
 
   const selectedTypeOption = feedTypeOptions.find(option => option.value === selectedType);
 
