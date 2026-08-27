@@ -4,6 +4,7 @@ import { useFeedUpdate } from '@/hooks/useFeedUpdate';
 import { useAuth } from '@/hooks/useAuth';
 import { useSuperUser } from '@/hooks/useSuperUser';
 import { Feed } from '@/types/feed';
+import { extractSteamAppId, buildSteamRSSUrl } from '@/utils/steam';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
