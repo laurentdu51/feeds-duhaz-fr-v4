@@ -87,6 +87,24 @@ const FeedForm = ({ selectedType, onSubmit, onCancel, categories }: FeedFormProp
     form.setValue('url', url);
     setUrlWarning(null);
     setShowInstructions(false);
+
+    // Steam détecté quel que soit le type choisi : on convertit tout de suite
+    if (url && /steam/i.test(url)) {
+      const appId = extractSteamAppId(url);
+      if (appId) {
+        form.setValue('url', buildSteamRSSUrl(appId));
+        if (!form.getValues('name')) {
+          const gameName = extractSteamGameName(url);
+          if (gameName) form.setValue('name', gameName);
+        }
+        setUrlWarning(`✓ Jeu Steam détecté (app ${appId}). Flux d'actualités généré automatiquement.`);
+      } else {
+        setUrlWarning('Impossible de détecter l\'ID du jeu. Utilisez une URL du type https://store.steampowered.com/app/2713000/...');
+      }
+      return;
+    }
+
+
     
     // If it's a YouTube URL, try to automatically fetch RSS URL and channel name
     if (selectedType === 'youtube' && url && url.includes('youtube.com')) {
