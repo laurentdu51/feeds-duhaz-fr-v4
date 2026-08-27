@@ -169,27 +169,8 @@ const FeedForm = ({ selectedType, onSubmit, onCancel, categories }: FeedFormProp
       
       setIsLoadingChannelName(false);
     }
-
-    // Steam: extract the app id from the store URL and build the news RSS feed
-    if (selectedType === 'steam' && url) {
-      const appId = extractSteamAppId(url);
-
-      if (appId) {
-        form.setValue('url', `https://store.steampowered.com/feeds/news/app/${appId}/`);
-
-        if (!form.getValues('name')) {
-          const gameName = extractSteamGameName(url);
-          if (gameName) {
-            form.setValue('name', gameName);
-          }
-        }
-
-        setUrlWarning(`✓ Jeu Steam détecté (app ${appId}). Flux d'actualités généré automatiquement.`);
-      } else {
-        setUrlWarning('Impossible de détecter l\'ID du jeu. Utilisez une URL du type https://store.steampowered.com/app/2713000/...');
-      }
-    }
   };
+
 
   const selectedTypeOption = feedTypeOptions.find(option => option.value === selectedType);
 
