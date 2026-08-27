@@ -9,6 +9,23 @@ export interface ChangelogEntry {
 
 export const changelogData: ChangelogEntry[] = [
   {
+    version: "1.16.0",
+    date: "2026-08-27",
+    category: "improvement",
+    title: "Robustesse, filtres unifiés et support Steam automatique",
+    description: "Amélioration de la stabilité de l'application, simplification des filtres et ajout d'une conversion automatique des URLs Steam.",
+    details: [
+      "Conversion automatique des URLs de la boutique Steam en flux RSS de news (/feeds/news/app/<id>/)",
+      "Nom du jeu Steam pré-rempli automatiquement depuis le slug de l'URL",
+      "Protection robuste de la page /pinned : attente de la session avant tout chargement",
+      "Nettoyage complet des console.log/console.warn en production",
+      "Filtres de la sidebar unifiés en une seule liste verticale cohérente",
+      "Affichage automatique de 'Mes flux' pour les utilisateurs connectés",
+      "Page /health avec rapport de connectivité API",
+      "Boutons actifs du dark mode corrigés pour un meilleur contraste"
+    ]
+  },
+  {
     version: "1.15.0",
     date: "2026-04-08",
     category: "improvement",
