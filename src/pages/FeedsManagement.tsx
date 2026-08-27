@@ -80,17 +80,22 @@ const FeedsManagement = () => {
     }
 
     try {
+      // Filet de sécurité : une URL Steam boutique est convertie en flux d'actualités
+      const steamAppId = /steam/i.test(feedData.url) ? extractSteamAppId(feedData.url) : null;
+      const finalUrl = steamAppId ? buildSteamRSSUrl(steamAppId) : feedData.url;
+
       // Insert the new feed
       const { data: newFeed, error } = await supabase
         .from('feeds')
         .insert({
           name: feedData.name,
-          url: feedData.url,
-          type: feedData.type,
+          url: finalUrl,
+          type: steamAppId ? 'steam' : feedData.type,
           description: feedData.description || null,
           category: feedData.category || 'general',
           status: 'pending'
         })
+
         .select()
         .single();
 
