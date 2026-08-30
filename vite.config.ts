@@ -18,18 +18,6 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     target: ['es2015', 'safari12'],
-    minify: 'terser',
-    terserOptions: {
-      ecma: 5,
-      safari10: true,
-      compress: { arrows: false },
-      format: { ecma: 5 },
-    },
-    rollupOptions: {
-      output: {
-        generatedCode: { arrowFunctions: false, constBindings: false, objectShorthand: false },
-      },
-    },
   },
   plugins: [
     react(),
