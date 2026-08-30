@@ -18,6 +18,11 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     target: ['es2015', 'safari12'],
+    rollupOptions: {
+      output: {
+        generatedCode: { arrowFunctions: false, constBindings: false, objectShorthand: false },
+      },
+    },
   },
   plugins: [
     react(),
