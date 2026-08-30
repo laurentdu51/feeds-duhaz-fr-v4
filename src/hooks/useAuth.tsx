@@ -22,14 +22,34 @@ export function useAuth() {
       }
     );
 
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (isMounted) {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
+    // Check for an existing session. Invalid or obsolete refresh tokens must
+    // not prevent the app from rendering, notably after a backend migration.
+    const initializeSession = async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+
+        if (!isMounted) return;
+
+        if (error) {
+          await supabase.auth.signOut({ scope: 'local' });
+          if (!isMounted) return;
+          setSession(null);
+          setUser(null);
+          return;
+        }
+
+        setSession(data.session);
+        setUser(data.session?.user ?? null);
+      } catch {
+        if (!isMounted) return;
+        setSession(null);
+        setUser(null);
+      } finally {
+        if (isMounted) setLoading(false);
       }
-    });
+    };
+
+    void initializeSession();
 
     return () => {
       isMounted = false;
