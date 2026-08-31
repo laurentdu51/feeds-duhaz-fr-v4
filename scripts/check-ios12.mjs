@@ -59,31 +59,22 @@ html.includes("System.import") || html.includes("__vite_legacy")
   ? ok("loader SystemJS legacy injecté")
   : fail("loader SystemJS legacy absent de index.html");
 
-console.log("\n[3/4] Analyse syntaxique des chunks legacy (cible Safari 12 / ES2018)...");
+console.log("\n[3/4] Analyse syntaxique des chunks legacy (cible Safari 12)...");
 const { parse } = await import("acorn");
-// Safari 12 supporte ES2018 (arrow, spread, async) mais PAS ES2020 (?. ??)
-const ES2020_ONLY = [
-  [/\?\./, "optional chaining (?.)"],
-  [/\?\?/, "nullish coalescing (??)"],
-  [/\*\*=|[^*]\*\*[^*]/, "exponentiation (**)"],
-  [/\bBigInt\b|\d+n\b/, "BigInt"],
-];
+// Safari 12 = ES2019 (arrow, spread, async, optional catch binding)
+// mais PAS ES2020 (?. ?? BigInt) : acorn rejette ces jetons en ecmaVersion 2019.
+const chunksToCheck = [...new Set([...legacyChunks, ...polyfillChunks])].filter((f) =>
+  /legacy/.test(f)
+);
 
-for (const file of [...legacyChunks, ...polyfillChunks.filter((f) => /legacy/.test(f))]) {
+for (const file of chunksToCheck) {
   const code = readFileSync(join(assetsDir, file), "utf8");
-  let syntaxOk = true;
   try {
-    parse(code, { ecmaVersion: 2018, sourceType: "script" });
+    parse(code, { ecmaVersion: 2019, sourceType: "script" });
+    ok(`${file} : compatible Safari 12`);
   } catch (e) {
-    syntaxOk = false;
     fail(`${file} : syntaxe non supportée par Safari 12 → ${e.message}`);
   }
-  const modern = ES2020_ONLY.filter(([re]) => re.test(code)).map(([, n]) => n);
-  if (modern.length) {
-    syntaxOk = false;
-    fail(`${file} : opérateurs ES2020 non transpilés → ${modern.join(", ")}`);
-  }
-  if (syntaxOk) ok(`${file} : compatible Safari 12`);
 }
 
 console.log("\n[4/4] Test manuel guidé sur iOS 12.5");
