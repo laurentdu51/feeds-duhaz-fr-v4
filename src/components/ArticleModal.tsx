@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { NewsItem } from '@/types/news';
 import { containsHtml, renderHtmlContent } from '@/utils/htmlContent';
+import { decodeHtmlEntities } from '@/utils/htmlDecode';
 import { toast } from 'sonner';
 import { 
   Clock, 
