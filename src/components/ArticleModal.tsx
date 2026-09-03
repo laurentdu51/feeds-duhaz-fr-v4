@@ -9,6 +9,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { NewsItem } from '@/types/news';
+import { containsHtml, renderHtmlContent } from '@/utils/htmlContent';
+import { decodeHtmlEntities } from '@/utils/htmlDecode';
 import { toast } from 'sonner';
 import { 
   Clock, 
@@ -134,15 +136,21 @@ const ArticleModal = ({ isOpen, onClose, article }: ArticleModalProps) => {
           {/* Article Description */}
           <div className="prose prose-sm max-w-none">
             <p className="text-muted-foreground leading-relaxed">
-              {article.description}
+              {decodeHtmlEntities(article.description)}
             </p>
           </div>
 
           {/* Article Content */}
           <div className="prose prose-sm max-w-none">
-            <div className="text-foreground leading-relaxed whitespace-pre-wrap">
-              {article.content}
-            </div>
+            {containsHtml(article.content) ? (
+              <div className="text-foreground leading-relaxed space-y-3">
+                {renderHtmlContent(article.content)}
+              </div>
+            ) : (
+              <div className="text-foreground leading-relaxed whitespace-pre-wrap">
+                {article.content}
+              </div>
+            )}
           </div>
 
           {/* External Link Button */}
