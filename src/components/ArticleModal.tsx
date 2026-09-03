@@ -135,7 +135,7 @@ const ArticleModal = ({ isOpen, onClose, article }: ArticleModalProps) => {
           {/* Article Description */}
           <div className="prose prose-sm max-w-none">
             <p className="text-muted-foreground leading-relaxed">
-              {article.description}
+              {decodeHtmlEntities(article.description)}
             </p>
           </div>
 
