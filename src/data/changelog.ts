@@ -9,6 +9,22 @@ export interface ChangelogEntry {
 
 export const changelogData: ChangelogEntry[] = [
   {
+    version: "1.17.0",
+    date: "2026-09-10",
+    category: "improvement",
+    title: "Compatibilité iOS 12.5 et rendu HTML des flux Steam",
+    description: "Ajout d'un support legacy pour les anciens appareils Apple, correction du rendu HTML des flux Steam et amélioration du décodage des caractères spéciaux.",
+    details: [
+      "Support de Safari iOS 12.5 via un bundle legacy et des polyfills",
+      "Script de vérification automatique du bundle iOS 12.5 avant publication",
+      "Checklist manuelle de test iOS 12.5 dans docs/ios12-manual-check.md",
+      "Rendu HTML sécurisé du contenu Steam (paragraphes, images, liens, titres)",
+      "Nettoyage des descriptions Steam des balises HTML résiduelles",
+      "Correction du double encodage HTML (&eacute; → é) dans les résumés et contenus",
+      "Isolation des jetons d'authentification obsolètes pour éviter les écrans blancs"
+    ]
+  },
+  {
     version: "1.16.0",
     date: "2026-08-27",
     category: "improvement",
