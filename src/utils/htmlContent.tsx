@@ -1,4 +1,5 @@
 import React from 'react';
+import { decodeHtmlEntities } from './htmlDecode';
 
 // Whitelisted tags for safe rendering of RSS/Steam HTML content
 const ALLOWED_TAGS = new Set([
