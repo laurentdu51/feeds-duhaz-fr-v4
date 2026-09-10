@@ -23,8 +23,15 @@ export const decodeHtmlEntities = (text: string): string => {
   // DOMParser creates an inert document that doesn't execute scripts or load resources
   let decoded: string;
   try {
-    const doc = new DOMParser().parseFromString(text, 'text/html');
-    decoded = doc.documentElement.textContent || '';
+    decoded = text;
+    // Some feeds are double (or triple) encoded: "&amp;eacute;" -> "&eacute;" -> "é"
+    for (let i = 0; i < 3; i++) {
+      if (!/&[a-z#0-9]+;/i.test(decoded)) break;
+      const doc = new DOMParser().parseFromString(decoded, 'text/html');
+      const next = doc.documentElement.textContent || '';
+      if (next === decoded) break;
+      decoded = next;
+    }
   } catch {
     // Fallback for edge cases - just return the original text
     decoded = text;

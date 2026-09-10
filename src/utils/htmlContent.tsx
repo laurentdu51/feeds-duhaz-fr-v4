@@ -1,4 +1,5 @@
 import React from 'react';
+import { decodeHtmlEntities } from './htmlDecode';
 
 // Whitelisted tags for safe rendering of RSS/Steam HTML content
 const ALLOWED_TAGS = new Set([
@@ -20,7 +21,10 @@ const isSafeUrl = (url: string): boolean => {
 // Converts a parsed DOM node into React elements (no innerHTML, whitelist-based)
 const nodeToReact = (node: Node, key: number | string): React.ReactNode => {
   if (node.nodeType === Node.TEXT_NODE) {
-    return node.textContent;
+    const raw = node.textContent || '';
+    // Handle double-encoded entities (&amp;eacute;) left over after parsing
+    const decoded = decodeHtmlEntities(raw);
+    return decoded.indexOf('<') === -1 ? decoded : raw;
   }
   if (node.nodeType !== Node.ELEMENT_NODE) return null;
 
