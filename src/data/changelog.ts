@@ -9,6 +9,20 @@ export interface ChangelogEntry {
 
 export const changelogData: ChangelogEntry[] = [
   {
+    version: "1.18.0",
+    date: "2026-09-30",
+    category: "improvement",
+    title: "Navigation vers les flux depuis tout le site et correction du rafraîchissement des pages",
+    description: "Le nom d'un flux est désormais cliquable partout (accueil, épinglés, page de flux, modal d'article) et le rechargement direct des pages internes ne renvoie plus d'erreur 404.",
+    details: [
+      "Nom du flux cliquable sur les cartes de l'accueil pour voir tous ses articles",
+      "Nom du flux cliquable sur la page Articles épinglés",
+      "Nom du flux cliquable dans la page d'un flux",
+      "Nom du flux cliquable dans le modal d'article",
+      "Correction des erreurs 404 au rechargement des pages /pinned et /changelog (routage SPA côté serveur)"
+    ]
+  },
+  {
     version: "1.17.0",
     date: "2026-09-10",
     category: "improvement",
