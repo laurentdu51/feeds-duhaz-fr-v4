@@ -184,6 +184,7 @@ const FeedDetail = () => {
                   onMarkAsRead={markAsRead}
                   onDelete={deleteArticle}
                   onOpenArticle={handleOpenArticle}
+                  onSourceClick={(id) => navigate(`/feed/${id}`)}
                 />
               ))}
             </div>

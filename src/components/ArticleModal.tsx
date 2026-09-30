@@ -9,8 +9,10 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { NewsItem } from '@/types/news';
+import { cn } from '@/lib/utils';
 import { containsHtml, renderHtmlContent } from '@/utils/htmlContent';
 import { decodeHtmlEntities } from '@/utils/htmlDecode';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { 
   Clock, 
@@ -30,7 +32,15 @@ interface ArticleModalProps {
 }
 
 const ArticleModal = ({ isOpen, onClose, article }: ArticleModalProps) => {
+  const navigate = useNavigate();
   if (!article) return null;
+
+  const handleSourceClick = () => {
+    if (article.feedId) {
+      onClose();
+      navigate(`/feed/${article.feedId}`);
+    }
+  };
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -76,7 +86,15 @@ const ArticleModal = ({ isOpen, onClose, article }: ArticleModalProps) => {
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader className="space-y-4">
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className={getSourceColor(article.category)}>
+            <Badge
+              variant="outline"
+              className={cn(
+                getSourceColor(article.category),
+                article.feedId && "cursor-pointer hover:opacity-80 transition-opacity"
+              )}
+              onClick={handleSourceClick}
+              title={article.feedId ? "Voir tous les articles de ce flux" : undefined}
+            >
               {article.source}
             </Badge>
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
