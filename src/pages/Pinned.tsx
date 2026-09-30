@@ -106,6 +106,7 @@ const PinnedContent = () => {
                 onMarkAsRead={markAsRead}
                 onDelete={deleteArticle}
                 onOpenArticle={setSelectedArticle}
+                onSourceClick={(feedId) => navigate(`/feed/${feedId}`)}
               />
             ))}
           </div>

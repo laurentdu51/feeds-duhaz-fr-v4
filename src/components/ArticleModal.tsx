@@ -9,6 +9,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { NewsItem } from '@/types/news';
+import { cn } from '@/lib/utils';
 import { containsHtml, renderHtmlContent } from '@/utils/htmlContent';
 import { decodeHtmlEntities } from '@/utils/htmlDecode';
 import { useNavigate } from 'react-router-dom';
