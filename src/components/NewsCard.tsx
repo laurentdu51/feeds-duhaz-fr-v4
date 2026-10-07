@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Clock, Pin, ExternalLink, Eye, Trash2, Copy, Rss, Youtube, Gamepad2, Newspaper, Radio, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
-import { decodeHtmlEntities } from '@/utils/htmlDecode';
+import { decodeHtmlEntities, cleanPlainText } from '@/utils/htmlDecode';
 import { unwrapGoogleRedirect } from '@/utils/redirects';
 
 const formatRelativeTime = (dateString: string): string => {
