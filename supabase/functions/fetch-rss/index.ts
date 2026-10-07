@@ -211,7 +211,9 @@ serve(async (req) => {
     while ((itemMatch = itemRegex.exec(rssText)) !== null) {
       const itemXml = itemMatch[0];
       
-      const title = decodeXmlEntities(extractTextContent(itemXml, 'title'));
+      // Decode entities first, then strip markup, so "&lt;b&gt;Commercy&lt;/b&gt;" becomes "Commercy"
+      const rawTitle = extractTextContent(itemXml, 'title');
+      const title = decodeXmlEntities(rawTitle).replace(/<[^>]*>/g, '').trim();
       const description = extractTextContent(itemXml, 'description') || 
                          extractTextContent(itemXml, 'summary') ||
                          extractTextContent(itemXml, 'content');
