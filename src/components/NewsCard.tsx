@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Clock, Pin, ExternalLink, Eye, Trash2, Copy, Rss, Youtube, Gamepad2, Newspaper, Radio, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
-import { decodeHtmlEntities } from '@/utils/htmlDecode';
+import { decodeHtmlEntities, cleanPlainText } from '@/utils/htmlDecode';
+import { unwrapGoogleRedirect } from '@/utils/redirects';
 
 const formatRelativeTime = (dateString: string): string => {
   const date = new Date(dateString);
@@ -117,7 +118,7 @@ const NewsCard = ({
               news.isRead && "text-muted-foreground"
             )}>
               {getCategoryIcon(news.category)}
-              {decodeHtmlEntities(news.title)}
+              {cleanPlainText(news.title)}
             </h3>
           </div>
           
@@ -186,7 +187,7 @@ const NewsCard = ({
                 }
               }}
             >
-              {news.source}
+              {cleanPlainText(news.source)}
             </Badge>
             <span>
               {new Date(news.publishedAt).toLocaleDateString('fr-FR', {
@@ -227,7 +228,7 @@ const NewsCard = ({
                 className="gap-1"
                 onClick={e => {
                   e.stopPropagation();
-                  window.open(news.url, '_blank');
+                  window.open(unwrapGoogleRedirect(news.url), '_blank');
                 }}
               >
                 <ExternalLink className="h-3 w-3" />

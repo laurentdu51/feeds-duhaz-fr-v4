@@ -46,3 +46,12 @@ export const decodeHtmlEntities = (text: string): string => {
   
   return decoded;
 };
+
+/**
+ * Decodes entities and removes any markup from a plain-text field (titles, badges).
+ * Safe by construction: text nodes only, no HTML rendering involved.
+ */
+export const cleanPlainText = (text: string): string => {
+  if (!text) return '';
+  return decodeHtmlEntities(text).replace(/<[^>]*>/g, '').trim();
+};

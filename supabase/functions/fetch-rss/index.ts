@@ -66,6 +66,44 @@ function generateYouTubeThumbnail(videoUrl: string): string | null {
   return videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
 }
 
+// Decode HTML entities that appear inside XML text nodes (&amp; -> &, &#39; -> ', etc.)
+function decodeXmlEntities(input: string): string {
+  if (!input) return input;
+  const named: Record<string, string> = {
+    amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ',
+    eacute: 'é', egrave: 'è', agrave: 'à', ccedil: 'ç', ecirc: 'ê',
+  };
+  return input
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, h) => String.fromCodePoint(parseInt(h, 16)))
+    .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(parseInt(d, 10)))
+    .replace(/&([a-zA-Z]+);/g, (m, name) => named[name] ?? m);
+}
+
+// Google News/Alerts feeds wrap every article link in a redirect URL like
+// https://www.google.com/url?rct=j&sa=t&url=https://example.com/article&ct=ga&cd=...
+// Unwrap it so we store and display the final destination URL directly.
+function unwrapGoogleRedirect(rawLink: string): string {
+  if (!rawLink) return rawLink;
+  const link = decodeXmlEntities(rawLink).trim();
+  try {
+    const url = new URL(link);
+    const host = url.hostname.toLowerCase().replace(/^www\./, '');
+    if (
+      (host === 'google.com' || host === 'news.google.com') &&
+      (url.pathname === '/url' || url.pathname === '/link')
+    ) {
+      const target = url.searchParams.get('url') || url.searchParams.get('q');
+      if (target && /^https?:\/\//i.test(target)) {
+        // Keep only http(s) targets; return the decoded final URL
+        return target;
+      }
+    }
+  } catch {
+    // Not a parsable URL - return as-is
+  }
+  return link;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -173,7 +211,9 @@ serve(async (req) => {
     while ((itemMatch = itemRegex.exec(rssText)) !== null) {
       const itemXml = itemMatch[0];
       
-      const title = extractTextContent(itemXml, 'title');
+      // Decode entities first, then strip markup, so "&lt;b&gt;Commercy&lt;/b&gt;" becomes "Commercy"
+      const rawTitle = extractTextContent(itemXml, 'title');
+      const title = decodeXmlEntities(rawTitle).replace(/<[^>]*>/g, '').trim();
       const description = extractTextContent(itemXml, 'description') || 
                          extractTextContent(itemXml, 'summary') ||
                          extractTextContent(itemXml, 'content');
@@ -183,6 +223,8 @@ serve(async (req) => {
         // Try to get link from href attribute
         link = extractAttribute(itemXml, 'link', 'href');
       }
+      // Unwrap Google redirect links to the final destination URL
+      link = unwrapGoogleRedirect(link);
       
       const pubDate = extractTextContent(itemXml, 'pubDate') || 
                      extractTextContent(itemXml, 'published') ||
