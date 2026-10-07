@@ -118,7 +118,7 @@ const NewsCard = ({
               news.isRead && "text-muted-foreground"
             )}>
               {getCategoryIcon(news.category)}
-              {decodeHtmlEntities(news.title)}
+              {cleanPlainText(news.title)}
             </h3>
           </div>
           
@@ -187,7 +187,7 @@ const NewsCard = ({
                 }
               }}
             >
-              {news.source}
+              {cleanPlainText(news.source)}
             </Badge>
             <span>
               {new Date(news.publishedAt).toLocaleDateString('fr-FR', {
