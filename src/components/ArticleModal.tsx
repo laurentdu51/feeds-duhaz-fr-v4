@@ -96,7 +96,7 @@ const ArticleModal = ({ isOpen, onClose, article }: ArticleModalProps) => {
               onClick={handleSourceClick}
               title={article.feedId ? "Voir tous les articles de ce flux" : undefined}
             >
-              {article.source}
+              {cleanPlainText(article.source)}
             </Badge>
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <Clock className="h-3 w-3" />
@@ -106,7 +106,7 @@ const ArticleModal = ({ isOpen, onClose, article }: ArticleModalProps) => {
           
           <DialogTitle className="flex items-center gap-2 text-xl font-bold leading-tight text-left">
             {getCategoryIcon(article.category)}
-            {article.title}
+            {cleanPlainText(article.title)}
           </DialogTitle>
           
           <DialogDescription className="sr-only">
