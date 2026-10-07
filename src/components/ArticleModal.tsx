@@ -12,6 +12,7 @@ import { NewsItem } from '@/types/news';
 import { cn } from '@/lib/utils';
 import { containsHtml, renderHtmlContent } from '@/utils/htmlContent';
 import { decodeHtmlEntities } from '@/utils/htmlDecode';
+import { unwrapGoogleRedirect } from '@/utils/redirects';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { 
