@@ -9,6 +9,19 @@ export interface ChangelogEntry {
 
 export const changelogData: ChangelogEntry[] = [
   {
+    version: "1.19.0",
+    date: "2026-10-07",
+    category: "bugfix",
+    title: "Liens des flux Google redirigés vers l'article d'origine",
+    description: "Les articles issus des agrégateurs Google (Alertes et News) affichaient un lien de redirection Google. Le lien final de l'article est désormais utilisé partout, et les titres et noms de flux s'affichent sans codes résiduels.",
+    details: [
+      "Les liens google.com/url?... sont remplacés par le lien réel de l'article (boutons « Lire », « Voir la source » et « Copier le lien »)",
+      "Décodage appliqué aussi aux articles déjà enregistrés, sans attendre une nouvelle récupération",
+      "Titres et noms de flux nettoyés des balises et codes HTML restants (ex. &lt;b&gt;Commercy&lt;/b>, l&#039;actualité)",
+      "La récupération RSS stockera directement le lien final et un titre propre pour les prochains articles"
+    ]
+  },
+  {
     version: "1.18.0",
     date: "2026-09-30",
     category: "improvement",
