@@ -228,7 +228,7 @@ const NewsCard = ({
                 className="gap-1"
                 onClick={e => {
                   e.stopPropagation();
-                  window.open(news.url, '_blank');
+                  window.open(unwrapGoogleRedirect(news.url), '_blank');
                 }}
               >
                 <ExternalLink className="h-3 w-3" />
